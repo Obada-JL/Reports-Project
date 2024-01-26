@@ -1,0 +1,5 @@
+.listing-picker-label {
+  color: var(--theme-color-dark);
+  line-height: 40px;
+  font-weight: 500;
+}
