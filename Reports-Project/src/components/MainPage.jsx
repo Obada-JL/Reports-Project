@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
 import ModalComponent from "./AddComplaint";
 import DetailPage from "./DetailPage";
-import { Link } from "react-router-dom";
+import { Link, useP, useParamsarams } from "react-router-dom";
 import AddComplaint from "./AddComplaint";
 
 function MainPage(props) {
@@ -73,7 +73,7 @@ function MainPage(props) {
       address: record.Adress,
       title: record.title,
     };
-    console.log(Values.title);
+
     fetch("https://complaintapi.kodunya.com/api/Complaints", {
       method: "POST",
       headers: {
@@ -83,12 +83,9 @@ function MainPage(props) {
       body: JSON.stringify(Values), // Convert the object to a JSON string
     })
       .then((response) => {
-        console.log(response);
         return response.json();
       })
-      .then((data) => {
-        console.log(data);
-      })
+      .then((data) => {})
       .catch((error) => {
         console.error("Error during the fetch operation:", error);
       });
@@ -101,14 +98,12 @@ function MainPage(props) {
     fetch("https://complaintapi.kodunya.com/api/Complaints")
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         data.forEach((data) => {
           let status;
           if (data.length === 0) {
           } else {
             if (data.status === 0) {
               status = <td className="text-white bg-secondary">Pending</td>;
-              console.log(status);
             } else if (data.status === 1) {
               status = <td className="text-white bg-success">Accepted</td>;
             } else if (data.status === 2) {
@@ -119,7 +114,7 @@ function MainPage(props) {
               status = <td className="text-white bg-Dark">Closed</td>;
             }
             setTableContent((prevContent) => [
-              <tr onClick={handleOpenModal}>
+              <tr onClick={OpenDetailPage} id={data.id}>
                 <td>{data.title}</td>
                 <td>{data.category}</td>
                 <td>{data.createdDate.split("T")[0]}</td>
@@ -182,19 +177,14 @@ function MainPage(props) {
       .then((response) => {
         return response.json();
       })
-      .then((data) => {
-        console.log(data);
-      });
+      .then((data) => {});
   };
-  const handleTest = (event) => {
-    <AddComplaint onFormSubmit={formSubmitHandler} />;
-    console.log(event);
-  };
+
   const OpenDetailPage = (event) => {
     console.log("entering");
-    const trElement = event.target.closest("tr");
-    console.log(trElement.id);
-    return <DetailPage onFormSubmit={formSubmitHandler} />;
+    const trElementId = event.target.closest("tr").id;
+    const history = useParams();
+    history.push(`/${trElementId}`);
   };
   return (
     <>
