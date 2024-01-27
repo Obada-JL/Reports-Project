@@ -71,8 +71,9 @@ function MainPage(props) {
       description: record.Description,
       category: record.Type,
       address: record.Adress,
+      title: record.title,
     };
-
+    console.log(Values.title);
     fetch("https://complaintapi.kodunya.com/api/Complaints", {
       method: "POST",
       headers: {
@@ -86,25 +87,7 @@ function MainPage(props) {
         return response.json();
       })
       .then((data) => {
-        const lastComplaint = data[data.length - 1];
-        setTableContent((prevContent) => [
-          <tr>
-            <td>{lastComplaint.title}</td>
-            <td>{lastComplaint.category}</td>
-            <td>{lastComplaint.createdDate}</td>
-            <td className="text-white bg-secondary">{lastComplaint.status}</td>
-            <td>
-              <FontAwesomeIcon
-                icon={faPenToSquare}
-                className="bg-warning p-1  rounded-start rounded-end text-white me-1"
-              />
-              <FontAwesomeIcon
-                icon={faTrashCan}
-                className="bg-danger p-1  rounded-start rounded-end text-white"
-              />
-            </td>
-          </tr>,
-        ]);
+        console.log(data);
       })
       .catch((error) => {
         console.error("Error during the fetch operation:", error);
@@ -114,48 +97,49 @@ function MainPage(props) {
   };
 
   // const loadComplaints = () => {
-  const [status, setStatus] = useState();
   useEffect(() => {
     fetch("https://complaintapi.kodunya.com/api/Complaints")
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
         data.forEach((data) => {
-          if (data.status === 0) {
-            setStatus(<td className="text-white bg-secondary">Pending</td>);
-          } else if (data.status === 1) {
-            setStatus(<td className="text-white bg-success">Accepted</td>);
-          } else if (data.status === 2) {
-            setStatus(<td className="text-white bg-danger">Rejected</td>);
-          } else if (data.status === 3) {
-            setStatus(<td className="text-white bg-primary">InProgress</td>);
-          } else if (data.status === 4) {
-            setStatus(<td className="text-white bg-Dark">Closed</td>);
+          let status;
+          if (data.length === 0) {
+          } else {
+            if (data.status === 0) {
+              status = <td className="text-white bg-secondary">Pending</td>;
+              console.log(status);
+            } else if (data.status === 1) {
+              status = <td className="text-white bg-success">Accepted</td>;
+            } else if (data.status === 2) {
+              status = <td className="text-white bg-danger">Rejected</td>;
+            } else if (data.status === 3) {
+              status = <td className="text-white bg-primary">InProgress</td>;
+            } else if (data.status === 4) {
+              status = <td className="text-white bg-Dark">Closed</td>;
+            }
+            setTableContent((prevContent) => [
+              <tr onClick={handleOpenModal}>
+                <td>{data.title}</td>
+                <td>{data.category}</td>
+                <td>{data.createdDate.split("T")[0]}</td>
+                {status}
+                <td>
+                  <FontAwesomeIcon
+                    icon={faPenToSquare}
+                    className="bg-warning p-1  rounded-start rounded-end text-white me-1"
+                  />
+                  <FontAwesomeIcon
+                    icon={faTrashCan}
+                    className="bg-danger p-1  rounded-start rounded-end text-white"
+                  />
+                </td>
+              </tr>,
+              ...prevContent,
+            ]);
           }
-          {
-            tableContent;
-          }
-          setTableContent((prevContent) => [
-            <tr onClick={handleOpenModal}>
-              <td>{data.title}</td>
-              <td>{data.category}</td>
-              <td>{data.createdDate.split("T")[0]}</td>
-
-              <td className="text-white bg-secondary">{status}</td>
-              <td>
-                <FontAwesomeIcon
-                  icon={faPenToSquare}
-                  className="bg-warning p-1  rounded-start rounded-end text-white me-1"
-                />
-                <FontAwesomeIcon
-                  icon={faTrashCan}
-                  className="bg-danger p-1  rounded-start rounded-end text-white"
-                />
-              </td>
-            </tr>,
-            ...prevContent,
-          ]);
         });
+        return;
       });
   }, []);
   // };
@@ -263,7 +247,7 @@ function MainPage(props) {
             <th>Status</th>
             <th></th>
           </tr>
-          {tableContent}
+          {tableContent.slice(0, Math.ceil(tableContent.length) / 2)}
           <tr onClick={OpenDetailPage}>
             <td>Alfreds Futterkiste</td>
             <td>Alfreds Futterkiste</td>

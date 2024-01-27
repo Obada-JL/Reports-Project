@@ -104,7 +104,7 @@ function AddComplaint(props) {
             </li>
             <li>
               <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p>Other...</p>
+                <p>Other</p>
               </a>
             </li>
           </ul>
