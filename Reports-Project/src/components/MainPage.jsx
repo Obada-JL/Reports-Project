@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
 import ModalComponent from "./AddComplaint";
 import DetailPage from "./DetailPage";
-import { Link, useP, useParamsarams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import AddComplaint from "./AddComplaint";
+import "./MainPage.css";
 
 function MainPage(props) {
   // description - search in navbar - filter complaints
@@ -22,23 +23,6 @@ function MainPage(props) {
       padding: "0px",
       borderRadius: " 10px",
       width: "1000px",
-    },
-    overlay: {
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
-    },
-  };
-  const modal2Styles = {
-    content: {
-      top: "50%",
-      left: "50%",
-      right: "auto",
-      bottom: "auto",
-      marginRight: "50%",
-      transform: "translate(-50%,-50%)",
-      border: "none",
-      padding: "0px",
-      height: "100%",
-      width: "100vw",
     },
     overlay: {
       backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -93,11 +77,13 @@ function MainPage(props) {
     handleCloseModal();
   };
 
-  // const loadComplaints = () => {
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
+    setLoading(true);
     fetch("https://complaintapi.kodunya.com/api/Complaints")
       .then((response) => response.json())
       .then((data) => {
+        console.log(data);
         data.forEach((data) => {
           let status;
           if (data.length === 0) {
@@ -135,16 +121,27 @@ function MainPage(props) {
           }
         });
         return;
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
-  // };
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [table, setTable] = useState(<div className="custom-loader"></div>);
+  useEffect(() => {
+    if (loading === true) {
+      setTable(<div className="custom-loader"></div>);
+    } else {
+      setTable(tableContent.slice(0, Math.ceil(tableContent.length) / 2));
+    }
+  }, [loading, tableContent]);
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const handleModalOpen = () => {
     setIsOpenModal(true);
+  };
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
   };
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -169,23 +166,13 @@ function MainPage(props) {
       }
     }
   };
-  const GetAPI = () => {
-    fetch("https://complaintapi.kodunya.com/api/Complaints", {
-      method: "POST",
-      body,
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {});
+  const navigate = useNavigate();
+  const OpenDetailPage = (event) => {
+    const trElement = event.target.closest("tr");
+    const trElementId = trElement.id;
+    navigate(`/${trElementId}`);
   };
 
-  const OpenDetailPage = (event) => {
-    console.log("entering");
-    const trElementId = event.target.closest("tr").id;
-    const history = useParams();
-    history.push(`/${trElementId}`);
-  };
   return (
     <>
       <div className="d-flex flex-column w-100 justify-content-center align-items-center mt-3">
@@ -237,7 +224,8 @@ function MainPage(props) {
             <th>Status</th>
             <th></th>
           </tr>
-          {tableContent.slice(0, Math.ceil(tableContent.length) / 2)}
+
+          {table}
           <tr onClick={OpenDetailPage}>
             <td>Alfreds Futterkiste</td>
             <td>Alfreds Futterkiste</td>
