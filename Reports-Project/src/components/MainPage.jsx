@@ -1,11 +1,16 @@
 import Logo from "../assets/logo.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare, faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCodeCommit,
+  faPenToSquare,
+  faTrashCan,
+} from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
 import ModalComponent from "./AddComplaint";
 import DetailPage from "./DetailPage";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import Cookies from "js-cookie";
 import AddComplaint from "./AddComplaint";
 import "./MainPage.css";
 
@@ -56,12 +61,13 @@ function MainPage(props) {
       category: record.Type,
       address: record.Adress,
       title: record.title,
+      userId: "",
     };
-
     fetch("https://complaintapi.kodunya.com/api/Complaints", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: "bearer " + cookieValue,
         // Add any other headers if needed
       },
       body: JSON.stringify(Values), // Convert the object to a JSON string
@@ -77,12 +83,20 @@ function MainPage(props) {
     handleCloseModal();
   };
 
+  const cookieValue = Cookies.get("cookie");
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     setLoading(true);
-    fetch("https://complaintapi.kodunya.com/api/Complaints")
+    fetch("https://complaintapi.kodunya.com/api/Complaints", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookieValue}`,
+      },
+    })
       .then((response) => response.json())
       .then((data) => {
+        console.log(cookieValue);
         console.log(data);
         data.forEach((data) => {
           let status;

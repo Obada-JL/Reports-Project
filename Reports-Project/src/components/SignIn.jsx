@@ -1,7 +1,10 @@
 import "./signIn.css";
 import Logo from "../assets/logo.jpg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useRef } from "react";
+import { useCookies } from "react-cookie";
 function SignIn() {
+  const [cookies, setCookie, removeCookie] = useCookies(["cookie"]);
   const handleBlur = (props) => {
     const input = props.target;
     const formisValid = () => {
@@ -28,7 +31,41 @@ function SignIn() {
       }
     }
   };
+  const userName = useRef();
+  const password = useRef();
 
+  const navigate = useNavigate();
+  const onLogin = () => {
+    const Values = {
+      userName: userName.current.value,
+      password: password.current.value,
+    };
+    fetch("https://complaintapi.kodunya.com/api/Users/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify(Values),
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
+        } else if (response.status === 401) {
+          return alert("user is not defined");
+        } else {
+          alert("another error");
+        }
+      })
+      .then((data) => {
+        setCookie("cookie", data.token);
+        navigate("/");
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error during the fetch operation:", error);
+      });
+  };
   return (
     <>
       <div className="sidenav bg-dark">
@@ -53,6 +90,7 @@ function SignIn() {
                   id="validationDefault01"
                   placeholder="Please Enter Your Username"
                   onBlur={handleBlur}
+                  ref={userName}
                   required
                 />
               </div>
@@ -67,13 +105,18 @@ function SignIn() {
                   aria-describedby="passwordHelpBlock"
                   placeholder="Please Enter Your Password"
                   onBlur={handleBlur}
+                  ref={password}
                   required
                 />
                 <div id="passwordHelpBlock" className="form-text ">
                   Your password must be 8-20 characters long
                 </div>
               </div>
-              <button type="submit" className="btn btn-black me-1">
+              <button
+                type="button"
+                className="btn btn-black me-1"
+                onClick={onLogin}
+              >
                 Login
               </button>
               <Link to={"/register"} className="btn btn-secondary">

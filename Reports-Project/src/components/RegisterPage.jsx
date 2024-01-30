@@ -48,9 +48,10 @@ function RegisterPage() {
     } else if (input.value.length > 7 && input.value.length < 21) {
       formisValid();
     } else if (password.current.value !== input.value) {
+      console.log("form invalid");
       formisinValid();
     } else {
-      if (!(password.current.value !== input.value)) {
+      if (password.current.value === input.value) {
         formisValid();
         password.current.classList.add("form-control");
         password.current.classList.remove("is-invalid");
@@ -59,6 +60,35 @@ function RegisterPage() {
         formisinValid();
       }
     }
+  };
+  const userName = useRef();
+  const phoneNumber = useRef();
+  const onRegister = () => {
+    const Values = {
+      name: userName.current.value,
+      phoneNumber: phoneNumber.current.value,
+      password: password.current.value,
+    };
+    fetch("https://complaintapi.kodunya.com/api/Users/SignUp", {
+      method: "POST",
+      headers: {
+        // Authorization : `bearer ${}`,
+        "Content-Type": "application/json",
+        // Add any other headers if needed
+      },
+      body: JSON.stringify(Values), // Convert the object to a JSON string
+    })
+      .then((response) => {
+        // console.log(resopnse.data.token);
+        console.log(response.json());
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error during the fetch operation:", error);
+      });
   };
   return (
     <>
@@ -77,20 +107,22 @@ function RegisterPage() {
           <div className="mt-lg-5">
             <form>
               <div className="form-group">
-                <label>Email</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  id="validationDefault01"
-                  placeholder="Please Enter Your Email"
-                  onBlur={handleBlur}
-                  required
-                />
                 <label>User Name</label>
                 <input
                   type="text"
                   className="form-control"
                   placeholder="Please Enter Your Username"
+                  ref={userName}
+                  onBlur={handleBlur}
+                  required
+                />
+                <label className="mt-2">Phone Number</label>
+                <input
+                  type="number"
+                  className="form-control "
+                  id="validationDefault01"
+                  placeholder="Please Enter Your Phone Number"
+                  ref={phoneNumber}
                   onBlur={handleBlur}
                   required
                 />
@@ -124,7 +156,11 @@ function RegisterPage() {
                   Your password must be 8-20 characters long
                 </div>
               </div>
-              <button type="submit" className="btn btn-secondary me-1">
+              <button
+                type="button"
+                className="btn btn-secondary me-1"
+                onClick={onRegister}
+              >
                 Register
               </button>
               <Link to={"/signIn"} className="btn btn-black ">

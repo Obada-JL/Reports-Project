@@ -3,14 +3,21 @@ import "./DetailPage.css";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShare } from "@fortawesome/free-solid-svg-icons";
+import Cookies from "js-cookie";
 function DetailPage() {
   const [loading, setLoading] = useState(false);
   const [table, setTable] = useState(<div className="custom-loader"></div>);
   const [tableContent, setTableContent] = useState([]);
   const { id } = useParams();
+
+  const cookieValue = Cookies.get("cookie");
   useEffect(() => {
     setLoading(true);
-    fetch(`https://complaintapi.kodunya.com/api/Complaints/${id}`)
+    fetch(`https://complaintapi.kodunya.com/api/Complaints/${id}`, {
+      headers: {
+        Authorization: "bearer " + cookieValue,
+      },
+    })
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
@@ -75,8 +82,34 @@ function DetailPage() {
       setTable(tableContent);
     }
   }, [loading, tableContent]);
+  const { urlId } = useParams();
+
   const onMessageSend = (event) => {
-    console.log(event);
+    const message = event.target.previousElementSibling.value;
+    const values = {
+      complaintId: urlId,
+      message: message,
+    };
+
+    console.log(event.target.previousElementSibling.value);
+    fetch("https://complaintapi.kodunya.com/api/ComplaintMessages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "bearer " + cookieValue,
+      },
+      body: JSON.stringify(values), // Convert the object to a JSON string
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error during the fetch operation:", error);
+      });
+    console.log(event.target.previousElementSibling.value);
   };
   return (
     <>
