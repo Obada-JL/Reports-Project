@@ -130,9 +130,10 @@
 
 .my_msg {
   opacity: 0.8;
+  justify-content: end;
 }
 .my_msg p {
-  margin-left: 94%;
+  margin-right: 25px;
 }
 
 .friend_msg {

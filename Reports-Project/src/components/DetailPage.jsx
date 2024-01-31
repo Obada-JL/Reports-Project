@@ -9,18 +9,19 @@ function DetailPage() {
   const [table, setTable] = useState(<div className="custom-loader"></div>);
   const [tableContent, setTableContent] = useState([]);
   const { id } = useParams();
+  const [messages, setMesages] = useState([]);
 
-  const cookieValue = Cookies.get("cookie");
+  const token = Cookies.get("cookie");
   useEffect(() => {
     setLoading(true);
     fetch(`https://complaintapi.kodunya.com/api/Complaints/${id}`, {
       headers: {
-        Authorization: "bearer " + cookieValue,
+        Authorization: "bearer " + token,
       },
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
+        console.log(data.messages);
         let status;
         if (data.status === 0) {
           status = (
@@ -69,7 +70,25 @@ function DetailPage() {
             </div>
           </>,
         ]);
-        return;
+        data.messages.forEach((message) => {
+          let sender;
+          if (message.userId === data.userId) {
+            sender = (
+              <div className="message my_msg h5">
+                <p className="bg-dark text-white"> {message.message}</p>
+              </div>
+            );
+          } else {
+            sender = (
+              <div className="message friend_msg  text-white">
+                <p className="bg-secondary">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                </p>
+              </div>
+            );
+          }
+          setMesages((prevContent) => [...prevContent, sender]);
+        });
       })
       .finally(() => {
         setLoading(false);
@@ -82,21 +101,18 @@ function DetailPage() {
       setTable(tableContent);
     }
   }, [loading, tableContent]);
-  const { urlId } = useParams();
-
   const onMessageSend = (event) => {
-    const message = event.target.previousElementSibling.value;
+    let message = event.target.previousElementSibling.value;
     const values = {
-      complaintId: urlId,
+      complaintId: id,
       message: message,
     };
-
     console.log(event.target.previousElementSibling.value);
     fetch("https://complaintapi.kodunya.com/api/ComplaintMessages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "bearer " + cookieValue,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(values), // Convert the object to a JSON string
     })
@@ -104,6 +120,8 @@ function DetailPage() {
         return response.json();
       })
       .then((data) => {
+        setMesages((prevContent) => [...prevContent, data.message]);
+        message = " ";
         console.log(data);
       })
       .catch((error) => {
@@ -111,6 +129,7 @@ function DetailPage() {
       });
     console.log(event.target.previousElementSibling.value);
   };
+
   return (
     <>
       {table}
@@ -156,6 +175,7 @@ function DetailPage() {
           Lorem ipsum dolor sit amet consectetur adipisicing elit.
         </p>
       </div>
+      {messages.slice(0, messages.length / 2)}
       <div className="chat_input bg-secondary opacity-50">
         <input type="text" placeholder="Type a message" />
         <FontAwesomeIcon
