@@ -21,7 +21,7 @@ function DetailPage() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data.messages);
+        console.log(data);
         let status;
         if (data.status === 0) {
           status = (
@@ -43,7 +43,10 @@ function DetailPage() {
           status = <td className="text-white bg-Dark p-2 rounded">Closed</td>;
         }
         setTableContent((prevContent) => [
-          <>
+          <div
+            className="d-flex flex-column"
+            style={{ flex: "65%", overflow: "scroll", overflowX: "hidden" }}
+          >
             <Link
               className=" position-absolute p-4 font-size link-secondary d-block text-decoration-none"
               to={".."}
@@ -51,7 +54,7 @@ function DetailPage() {
               &#171;
             </Link>
             <h1 className="d-flex justify-content-center pt-2">{data.title}</h1>
-            <div className="d-flex h5 justify-content-around pt-2">
+            <div className="d-flex flex-50 h5 justify-content-around pt-2">
               {status}
               <div className="d-flex gap-2">
                 <p>Date:</p> <p>{data.createdDate.split("T")[0]}</p>
@@ -60,15 +63,32 @@ function DetailPage() {
             <p className="d-flex justify-content-center h5 pb-3 border-bottom">
               {data.category}
             </p>
-            <div className="pt-1 ">
-              <p className="h4 ms-2 ">Adress:</p>
-              <p className="p-2">{data.address}</p>
+            <div className="d-flex justify-content-between p-2">
+              <div>
+                <div className="pt-1 ">
+                  <p className="h4 ms-2 ">Adress:</p>
+                  <p className="p-2">{data.address}</p>
+                </div>
+                <div>
+                  <p className="h4 ms-2 ">Description:</p>
+                  <p className="p-2">{data.description}</p>
+                </div>
+              </div>
+              <img
+                src={`https://complaintapi.kodunya.com/api/Files/${data.image}`}
+                width={350}
+              />
             </div>
-            <div className="border-bottom border-dark border-3 pb-1">
-              <p className="h4 ms-2 ">Description:</p>
-              <p className="p-2">{data.description}</p>
+            <p className="h4 mb-3 p-2">Logs:</p>
+            <div className="pb-1 d-flex gap-5 p-2">
+              <div className="d-flex gap-2 h5">
+                <p>{data.logs[0].logText}</p>
+              </div>
+              <div className="d-flex gap-2 h5">
+                <p>{data.logs[0].logDate.split("T")[0]}</p>
+              </div>
             </div>
-          </>,
+          </div>,
         ]);
         data.messages.forEach((message) => {
           let sender;
@@ -101,13 +121,14 @@ function DetailPage() {
       setTable(tableContent);
     }
   }, [loading, tableContent]);
+  const [AddMessage, setAddMessage] = useState(messages);
   const onMessageSend = (event) => {
+    event.preventDefault;
     let message = event.target.previousElementSibling.value;
     const values = {
       complaintId: id,
       message: message,
     };
-    console.log(event.target.previousElementSibling.value);
     fetch("https://complaintapi.kodunya.com/api/ComplaintMessages", {
       method: "POST",
       headers: {
@@ -120,78 +141,50 @@ function DetailPage() {
         return response.json();
       })
       .then((data) => {
-        setMesages((prevContent) => [...prevContent, data.message]);
-        message = " ";
-        console.log(data);
+        window.scrollTo(0, document.body.scrollHeight);
       })
       .catch((error) => {
         console.error("Error during the fetch operation:", error);
       });
-    console.log(event.target.previousElementSibling.value);
+    setAddMessage((prevContent) => [
+      ...prevContent,
+      <div className="message my_msg h5">
+        <p className="bg-dark text-white">{message}</p>
+      </div>,
+    ]);
+    event.target.previousElementSibling.value = "";
   };
-
   return (
-    <>
+    <div className="d-flex">
       {table}
 
-      <h1 className="d-flex justify-content-center pt-3">MESSAGING</h1>
-      <div className="message my_msg h5">
-        <p className="bg-dark text-white"> Hello</p>
+      <div
+        className="d-flex flex-column border-start border-dark border-2"
+        style={{ flex: "35%" }}
+      >
+        <h1 className="d-flex justify-content-center pt-3">MESSAGING</h1>
+        <div
+          className=""
+          style={{
+            overflow: "scroll",
+            overflowX: "hidden",
+            height: "calc(100vh - 198px)",
+          }}
+        >
+          {messages.slice(0, messages.length / 2)}
+          {AddMessage}
+        </div>
+
+        <div className="chat_input bg-secondary opacity-50">
+          <input type="text" placeholder="Type a message" />
+          <FontAwesomeIcon
+            className="icon text-dark"
+            icon={faShare}
+            onClick={onMessageSend}
+          />
+        </div>
       </div>
-      <div className="message friend_msg  text-white">
-        <p className="bg-secondary">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit.
-        </p>
-      </div>
-      <div className="message my_msg h5">
-        <p className="bg-dark text-white"> Hello</p>
-      </div>
-      <div className="message friend_msg  text-white">
-        <p className="bg-secondary">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit.
-        </p>
-      </div>
-      <div className="message my_msg h5">
-        <p className="bg-dark text-white"> Hello</p>
-      </div>
-      <div className="message friend_msg  text-white">
-        <p className="bg-secondary">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit.
-        </p>
-      </div>
-      <div className="message my_msg h5">
-        <p className="bg-dark text-white"> Hello</p>
-      </div>
-      <div className="message friend_msg  text-white">
-        <p className="bg-secondary">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit.
-        </p>
-      </div>
-      <div className="message my_msg h5">
-        <p className="bg-dark text-white"> Hello</p>
-      </div>
-      <div className="message friend_msg  text-white">
-        <p className="bg-secondary">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit.
-        </p>
-      </div>
-      {messages.slice(0, messages.length / 2)}
-      <div className="chat_input bg-secondary opacity-50">
-        <input type="text" placeholder="Type a message" />
-        <FontAwesomeIcon
-          className="icon text-dark"
-          icon={faShare}
-          onClick={onMessageSend}
-        />
-      </div>
-    </>
-    // <button
-    //   type="button"
-    //   className="btn btn-secondary"
-    //   onClick={onCancelHandler}
-    // >
-    //   Cancel
-    // </button>
+    </div>
   );
 }
 export default DetailPage;

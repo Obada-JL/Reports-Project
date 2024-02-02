@@ -60,7 +60,6 @@ function SignIn() {
       .then((data) => {
         setCookie("cookie", data.token);
         navigate("/");
-        console.log(data);
       })
       .catch((error) => {
         console.error("Error during the fetch operation:", error);

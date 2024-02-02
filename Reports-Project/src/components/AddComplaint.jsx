@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import "./AddComplaint.css";
+import Cookies from "js-cookie";
 function AddComplaint(props) {
   const Title = useRef();
   const Description = useRef();
@@ -20,14 +21,11 @@ function AddComplaint(props) {
   const formattedDate = `${year}-${month < 10 ? "0" + month : month}-${
     day < 10 ? "0" + day : day
   }`;
-
-  // useEffect(() => {
-  //   // Triggered after the component has rendered
-  //   setKey((prevKey) => prevKey + 1);
-  // }, []);
+  const [img, setImg] = useState("");
   const onAddComplaint = (event) => {
     event.preventDefault();
     const randomUUID = uuidv4();
+    console.log(new FormData());
     props.onFormSubmit({
       title: Title.current.value,
       Description: Description.current.value,
@@ -36,19 +34,9 @@ function AddComplaint(props) {
       status: "Pending",
       id: randomUUID,
       Adress: Adress.current.value,
-      // file: file.current,
+      image: img,
     });
   };
-  // const [selectedFile, setSelectedFile] = useState(null);
-  // const handleFileChange = (event) => {
-  //   setSelectedFile(event.target.files[0]);
-  // };
-  // useEffect(() => {
-  //   console.log("File selected:", selectedFile);
-  //   // Clear the selected file to allow selecting the same file again
-  //   setSelectedFile(null);
-  // });
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
@@ -62,10 +50,31 @@ function AddComplaint(props) {
     setFilteringButton(complaintType);
   };
   const [urlValue, setUrlValue] = useState("");
-
+  const token = Cookies.get("cookie");
   const setUrlChange = (event) => {
-    console.log(event.target.files[0].name);
+    let data = new FormData();
     setUrlValue(event.target.files[0].name);
+    data.append("file", event.target.files[0]);
+    fetch("https://complaintapi.kodunya.com/api/Files", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: data, // Convert the object to a JSON string
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        setImg(data);
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error during the fetch operation:", error);
+      });
+  };
+  const setUrl = (e) => {
+    console.log(e.target.value);
   };
   return (
     <form className="p-5 " onSubmit={onAddComplaint}>
@@ -147,6 +156,8 @@ function AddComplaint(props) {
           className="d-none"
           ref={file}
           onChange={setUrlChange}
+          onClick={setUrl}
+          required
         />
         <div className="d-flex gap-3 align-items-center">
           <button

@@ -48,7 +48,6 @@ function RegisterPage() {
     } else if (input.value.length > 7 && input.value.length < 21) {
       formisValid();
     } else if (password.current.value !== input.value) {
-      console.log("form invalid");
       formisinValid();
     } else {
       if (password.current.value === input.value) {
@@ -80,12 +79,10 @@ function RegisterPage() {
     })
       .then((response) => {
         // console.log(resopnse.data.token);
-        console.log(response.json());
+
         return response.json();
       })
-      .then((data) => {
-        console.log(data);
-      })
+      .then((data) => {})
       .catch((error) => {
         console.error("Error during the fetch operation:", error);
       });

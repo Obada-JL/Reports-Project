@@ -35,7 +35,7 @@ function MainPage(props) {
   };
   const [tableContent, setTableContent] = useState([]);
   const formSubmitHandler = (record) => {
-    // console.log(record.id);
+    console.log(record.id);
     setTableContent((prevContent) => [
       <tr onClick={handleOpenModal}>
         <td>{record.title}</td>
@@ -62,6 +62,7 @@ function MainPage(props) {
       address: record.Adress,
       title: record.title,
       userId: "",
+      image: record.image,
     };
     fetch("https://complaintapi.kodunya.com/api/Complaints", {
       method: "POST",
@@ -96,8 +97,6 @@ function MainPage(props) {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(cookieValue);
-        console.log(data);
         data.forEach((data) => {
           let status;
           if (data.length === 0) {
@@ -134,6 +133,9 @@ function MainPage(props) {
             ]);
           }
         });
+        {
+          tableContent.slice(Math.ceil(tableContent.length / 2));
+        }
         return;
       })
       .finally(() => {
@@ -240,58 +242,6 @@ function MainPage(props) {
           </tr>
 
           {table}
-          <tr onClick={OpenDetailPage}>
-            <td>Alfreds Futterkiste</td>
-            <td>Alfreds Futterkiste</td>
-            <td>15-01-2024</td>
-            <td className="bg-danger text-white " key={0}>
-              Rejected
-            </td>
-            <td>
-              <FontAwesomeIcon
-                icon={faPenToSquare}
-                className="bg-warning p-1  rounded-start rounded-end text-white me-1 cursor-pointer"
-              />
-              <FontAwesomeIcon
-                icon={faTrashCan}
-                className="bg-danger p-1  rounded-start rounded-end text-white cursor-pointer"
-              />
-            </td>
-          </tr>
-          <tr onClick={OpenDetailPage}>
-            <td>Centro comercial </td>
-            <td>Centro comercial </td>
-            <td>09-05-2023</td>
-            <td className="text-white bg-success " key={1}>
-              Accepted
-            </td>
-            <td>
-              <FontAwesomeIcon
-                icon={faPenToSquare}
-                className="bg-warning p-1  rounded-start rounded-end text-white me-1"
-              />
-              <FontAwesomeIcon
-                icon={faTrashCan}
-                className="bg-danger p-1  rounded-start rounded-end text-white"
-              />
-            </td>
-          </tr>
-          <tr onClick={OpenDetailPage}>
-            <td>Ernst Handel</td>
-            <td>Ernst Handel</td>
-            <td>17-03-2024</td>
-            <td className="text-white bg-secondary ">Pending</td>
-            <td>
-              <FontAwesomeIcon
-                icon={faPenToSquare}
-                className="bg-warning p-1  rounded-start rounded-end text-white me-1"
-              />
-              <FontAwesomeIcon
-                icon={faTrashCan}
-                className="bg-danger p-1  rounded-start rounded-end text-white"
-              />
-            </td>
-          </tr>
         </tbody>
       </table>
       {/* <Modal
