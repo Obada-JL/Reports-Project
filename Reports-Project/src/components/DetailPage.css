@@ -185,3 +185,18 @@
   border-radius: 30px;
   font-size: 1;
 }
+.bgStatus0 {
+  background-color: #6c757d !important;
+}
+.bgStatus1 {
+  background-color: #28a745 !important;
+}
+.bgStatus2 {
+  background-color: #dc3545 !important;
+}
+.bgStatus3 {
+  background-color: #ffc107 !important;
+}
+.bgStatus4 {
+  background-color: #17a2b8 !important;
+}

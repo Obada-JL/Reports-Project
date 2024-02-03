@@ -102,22 +102,24 @@ function MainPage(props) {
           if (data.length === 0) {
           } else {
             if (data.status === 0) {
-              status = <td className="text-white bg-secondary">Pending</td>;
+              status = "Pending";
             } else if (data.status === 1) {
-              status = <td className="text-white bg-success">Accepted</td>;
+              status = "Accepted";
             } else if (data.status === 2) {
-              status = <td className="text-white bg-danger">Rejected</td>;
+              status = "Rejected";
             } else if (data.status === 3) {
-              status = <td className="text-white bg-primary">InProgress</td>;
+              status = "InProgress";
             } else if (data.status === 4) {
-              status = <td className="text-white bg-Dark">Closed</td>;
+              status = "Closed";
             }
             setTableContent((prevContent) => [
               <tr onClick={OpenDetailPage} id={data.id}>
                 <td>{data.title}</td>
                 <td>{data.category}</td>
                 <td>{data.createdDate.split("T")[0]}</td>
-                {status}
+                <td className={`text-white bgStatus${data.status} p-2 rounded`}>
+                  {status}
+                </td>
                 <td>
                   <FontAwesomeIcon
                     icon={faPenToSquare}

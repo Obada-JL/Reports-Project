@@ -1,9 +1,10 @@
 import { Link, useParams } from "react-router-dom";
 import "./DetailPage.css";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShare } from "@fortawesome/free-solid-svg-icons";
 import Cookies from "js-cookie";
+import { AuthContext } from "../AppContext";
 function DetailPage() {
   const [loading, setLoading] = useState(false);
   const [table, setTable] = useState(<div className="custom-loader"></div>);
@@ -12,6 +13,48 @@ function DetailPage() {
   const [messages, setMesages] = useState([]);
 
   const token = Cookies.get("cookie");
+  const { isStaff, setStaffStatus } = useContext(AuthContext);
+  console.log(isStaff);
+  const [filteringButton, setFilteringButton] = useState("All");
+  const ComplaintTypes = (event) => {
+    let complaintType = event.target.outerText.split(" ")[0];
+    setFilteringButton(complaintType);
+  };
+  const changeStatus = () => {
+    <div className="dropdown">
+      <button
+        className="btn btn-secondary dropdown-toggle"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        {filteringButton}
+      </button>
+      <ul className="dropdown-menu">
+        <li>
+          <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+            <p>All Complaints</p>
+          </a>
+        </li>
+        <li>
+          <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+            <p> Accepted Complaints</p>
+          </a>
+        </li>
+        <li>
+          <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+            <p> Rejected</p>
+          </a>
+        </li>
+        <li>
+          <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+            <p>Pending </p>
+          </a>
+        </li>
+      </ul>
+    </div>;
+  };
+
   useEffect(() => {
     setLoading(true);
     fetch(`https://complaintapi.kodunya.com/api/Complaints/${id}`, {
@@ -24,23 +67,15 @@ function DetailPage() {
         console.log(data);
         let status;
         if (data.status === 0) {
-          status = (
-            <td className="text-white bg-secondary p-2 rounded">Pending</td>
-          );
+          status = "Pending";
         } else if (data.status === 1) {
-          status = (
-            <td className="text-white bg-success p-2 rounded">Accepted</td>
-          );
+          status = "Accepted";
         } else if (data.status === 2) {
-          status = (
-            <td className="text-white bg-danger p-2 rounded">Rejected</td>
-          );
+          status = "Rejected";
         } else if (data.status === 3) {
-          status = (
-            <td className="text-white bg-primary p-2 rounded">InProgress</td>
-          );
+          status = "InProgress";
         } else if (data.status === 4) {
-          status = <td className="text-white bg-Dark p-2 rounded">Closed</td>;
+          status = "Closed";
         }
         setTableContent((prevContent) => [
           <div
@@ -55,7 +90,12 @@ function DetailPage() {
             </Link>
             <h1 className="d-flex justify-content-center pt-2">{data.title}</h1>
             <div className="d-flex flex-50 h5 justify-content-around pt-2">
-              {status}
+              if (isStaff) {changeStatus()}else
+              {
+                <td className={`text-white bgStatus${data.status} p-2 rounded`}>
+                  {status}
+                </td>
+              }
               <div className="d-flex gap-2">
                 <p>Date:</p> <p>{data.createdDate.split("T")[0]}</p>
               </div>

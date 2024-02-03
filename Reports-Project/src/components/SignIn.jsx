@@ -3,6 +3,7 @@ import Logo from "../assets/logo.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import { useCookies } from "react-cookie";
+import { useAuth } from "../AppContext.jsx";
 function SignIn() {
   const [cookies, setCookie, removeCookie] = useCookies(["cookie"]);
   const handleBlur = (props) => {
@@ -34,6 +35,7 @@ function SignIn() {
   const userName = useRef();
   const password = useRef();
 
+  const { setStaffStatus } = useAuth();
   const navigate = useNavigate();
   const onLogin = () => {
     const Values = {
@@ -52,12 +54,18 @@ function SignIn() {
         if (response.status === 200) {
           return response.json();
         } else if (response.status === 401) {
-          return alert("user is not defined");
+          return Swal.fire({
+            title: "The user is not defined",
+            text: "Check your Username and password",
+            icon: "error",
+          });
         } else {
           alert("another error");
         }
       })
       .then((data) => {
+        console.log(data);
+        setStaffStatus(data.isStaff);
         setCookie("cookie", data.token);
         navigate("/");
       })

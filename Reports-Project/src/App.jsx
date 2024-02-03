@@ -9,6 +9,7 @@ import DetailPage from "./components/DetailPage";
 import AddComplaint from "./components/AddComplaint";
 import PageLayout from "./components/PageLayout";
 import NavBar from "./components/Navbar";
+import { AuthProvider } from "./AppContext";
 // const router = createBrowserRouter([
 //   {
 //     path: "/",
@@ -59,7 +60,11 @@ const router = createBrowserRouter([
   },
 ]);
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />;
+    </AuthProvider>
+  );
 }
 
 export default App;
