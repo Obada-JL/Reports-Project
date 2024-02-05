@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import "./DetailPage.css";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShare } from "@fortawesome/free-solid-svg-icons";
 import Cookies from "js-cookie";
@@ -13,48 +13,75 @@ function DetailPage() {
   const [messages, setMesages] = useState([]);
 
   const token = Cookies.get("cookie");
-  const { isStaff, setStaffStatus } = useContext(AuthContext);
-  console.log(isStaff);
-  const [filteringButton, setFilteringButton] = useState("All");
-  const ComplaintTypes = (event) => {
-    let complaintType = event.target.outerText.split(" ")[0];
-    setFilteringButton(complaintType);
-  };
-  const changeStatus = () => {
-    <div className="dropdown">
-      <button
-        className="btn btn-secondary dropdown-toggle"
-        type="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-      >
-        {filteringButton}
-      </button>
-      <ul className="dropdown-menu">
-        <li>
-          <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-            <p>All Complaints</p>
-          </a>
-        </li>
-        <li>
-          <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-            <p> Accepted Complaints</p>
-          </a>
-        </li>
-        <li>
-          <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-            <p> Rejected</p>
-          </a>
-        </li>
-        <li>
-          <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-            <p>Pending </p>
-          </a>
-        </li>
-      </ul>
-    </div>;
+  const { isStaff, canAccept, canReject, canInProgress, canClose } =
+    useContext(AuthContext);
+
+  const handleButtonClick = (action, message, apiEndpoint) => {
+    swal
+      .fire({
+        title: `Are you sure?`,
+        text: message,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: `Yes, ${action} it!`,
+        cancelButtonText: "No, cancel!",
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          fetch(apiEndpoint, {
+            method: "POST",
+            headers: {
+              Authorization: "bearer " + token,
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {});
+
+          swal.fire(
+            `${action}d!`,
+            `The ${action.toLowerCase()} action has been performed.`,
+            "success"
+          );
+        } else if (result.dismiss === swal.DismissReason.cancel) {
+          swal.fire(
+            "Cancelled",
+            `The ${action.toLowerCase()} action has been cancelled.`,
+            "error"
+          );
+        }
+      });
   };
 
+  const onChangeAccept = (e) => {
+    handleButtonClick(
+      "Accept",
+      "Are You sure to Change Status to Accept?",
+      `https://complaintapi.kodunya.com/api/Complaints/Accept/${id}`
+    );
+  };
+
+  const onChangeReject = (e) => {
+    handleButtonClick(
+      "Reject",
+      "Are You sure to Change Status to Reject?",
+      `https://complaintapi.kodunya.com/api/Complaints/Reject/${id}`
+    );
+  };
+  const onChangeInProgress = (e) => {
+    handleButtonClick(
+      "InProgress",
+      "Are You sure to Change Status to In Progress?",
+      `https://complaintapi.kodunya.com/api/Complaints/InProgress/${id}`
+    );
+  };
+  const onChangeClosed = (e) => {
+    handleButtonClick(
+      "Closed",
+      "Are You sure to Change Status to Closed?",
+      `https://complaintapi.kodunya.com/api/Complaints/Close/${id}`
+    );
+  };
   useEffect(() => {
     setLoading(true);
     fetch(`https://complaintapi.kodunya.com/api/Complaints/${id}`, {
@@ -64,7 +91,6 @@ function DetailPage() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         let status;
         if (data.status === 0) {
           status = "Pending";
@@ -76,6 +102,152 @@ function DetailPage() {
           status = "InProgress";
         } else if (data.status === 4) {
           status = "Closed";
+        }
+        let isUserStaff = "";
+
+        if (isStaff) {
+          if (status === "Accepted") {
+            if (canInProgress) {
+              if (canClose) {
+                isUserStaff = (
+                  <div className="d-flex gap-2">
+                    <button
+                      className="btn btn-warning"
+                      type="button"
+                      onClick={onChangeInProgress}
+                    >
+                      In Progress
+                    </button>
+                    <button
+                      className="btn btn-info"
+                      type="button"
+                      onClick={onChangeClosed}
+                    >
+                      Closed
+                    </button>
+                  </div>
+                );
+              } else {
+                isUserStaff = (
+                  <button
+                    className="btn btn-warning"
+                    type="button"
+                    onClick={onChangeInProgress}
+                  >
+                    In Progress
+                  </button>
+                );
+              }
+            } else {
+            }
+            if (canClose) {
+              if (canInProgress) {
+                isUserStaff = (
+                  <div className="d-flex gap-2">
+                    <button
+                      className="btn btn-warning"
+                      type="button"
+                      onClick={onChangeInProgress}
+                    >
+                      In Progress
+                    </button>
+                    <button
+                      className="btn btn-info"
+                      type="button"
+                      onClick={onChangeClosed}
+                    >
+                      Closed
+                    </button>
+                  </div>
+                );
+              } else {
+                isUserStaff = (
+                  <button
+                    className="btn btn-info"
+                    type="button"
+                    onClick={onChangeClosed}
+                  >
+                    Closed
+                  </button>
+                );
+              }
+            } else {
+            }
+          } else {
+            if (canAccept) {
+              if (canReject) {
+                isUserStaff = (
+                  <div className="d-flex gap-2">
+                    <button
+                      className="btn btn-success"
+                      type="button"
+                      onClick={onChangeAccept}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      type="button"
+                      onClick={onChangeReject}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                );
+              } else {
+                isUserStaff = (
+                  <button
+                    className="btn btn-success"
+                    type="button"
+                    onClick={onChangeAccept}
+                  >
+                    Accept
+                  </button>
+                );
+              }
+            } else {
+            }
+
+            if (canReject) {
+              if (canAccept) {
+                isUserStaff = (
+                  <div className="d-flex gap-2">
+                    <button
+                      className="btn btn-success"
+                      type="button"
+                      onClick={onChangeAccept}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      type="button"
+                      onClick={onChangeReject}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                );
+              } else {
+                isUserStaff = (
+                  <button
+                    className="btn btn-danger"
+                    type="button"
+                    onClick={onChangeReject}
+                  >
+                    Reject
+                  </button>
+                );
+              }
+            } else {
+            }
+          }
+        } else {
+          isUserStaff = (
+            <td className={`text-white bgStatus${data.status} p-2 rounded`}>
+              {status}
+            </td>
+          );
         }
         setTableContent((prevContent) => [
           <div
@@ -90,12 +262,7 @@ function DetailPage() {
             </Link>
             <h1 className="d-flex justify-content-center pt-2">{data.title}</h1>
             <div className="d-flex flex-50 h5 justify-content-around pt-2">
-              if (isStaff) {changeStatus()}else
-              {
-                <td className={`text-white bgStatus${data.status} p-2 rounded`}>
-                  {status}
-                </td>
-              }
+              {isUserStaff}
               <div className="d-flex gap-2">
                 <p>Date:</p> <p>{data.createdDate.split("T")[0]}</p>
               </div>

@@ -1,5 +1,13 @@
+import { useCookies } from "react-cookie";
 import Logo from "../assets/logo.jpg";
+import { useNavigate } from "react-router-dom";
 function NavBar() {
+  const [cookies, setCookie, removeCookie] = useCookies(["cookie"]);
+  const navigate = useNavigate();
+  const onLogout = () => {
+    removeCookie("cookie");
+    navigate("/signIn");
+  };
   return (
     <nav className="navbar navbar-expand-lg bg-dark">
       <div className="container-fluid">
@@ -35,17 +43,7 @@ function NavBar() {
               </a>
               <ul className="dropdown-menu">
                 <li>
-                  <a className="dropdown-item" href="#">
-                    Manage Account
-                  </a>
-                </li>
-                <li>
-                  <a className="dropdown-item" href="#">
-                    Another action
-                  </a>
-                </li>
-                <li>
-                  <a className="dropdown-item" href="#">
+                  <a className="dropdown-item" href="#" onClick={onLogout}>
                     Logout
                   </a>
                 </li>

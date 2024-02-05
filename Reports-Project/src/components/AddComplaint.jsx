@@ -25,7 +25,6 @@ function AddComplaint(props) {
   const onAddComplaint = (event) => {
     event.preventDefault();
     const randomUUID = uuidv4();
-    console.log(new FormData());
     props.onFormSubmit({
       title: Title.current.value,
       Description: Description.current.value,
@@ -67,15 +66,12 @@ function AddComplaint(props) {
       })
       .then((data) => {
         setImg(data);
-        console.log(data);
       })
       .catch((error) => {
         console.error("Error during the fetch operation:", error);
       });
   };
-  const setUrl = (e) => {
-    console.log(e.target.value);
-  };
+
   return (
     <form className="p-5 " onSubmit={onAddComplaint}>
       <div>
@@ -156,7 +152,6 @@ function AddComplaint(props) {
           className="d-none"
           ref={file}
           onChange={setUrlChange}
-          onClick={setUrl}
           required
         />
         <div className="d-flex gap-3 align-items-center">

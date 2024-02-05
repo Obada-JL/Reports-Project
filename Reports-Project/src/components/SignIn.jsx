@@ -35,7 +35,8 @@ function SignIn() {
   const userName = useRef();
   const password = useRef();
 
-  const { setStaffStatus } = useAuth();
+  const { setStaffStatus, setClose, setInProgress, setAccept, setReject } =
+    useAuth();
   const navigate = useNavigate();
   const onLogin = () => {
     const Values = {
@@ -64,10 +65,15 @@ function SignIn() {
         }
       })
       .then((data) => {
-        console.log(data);
-        setStaffStatus(data.isStaff);
-        setCookie("cookie", data.token);
-        navigate("/");
+        if (data.token) {
+          setStaffStatus(data.isStaff);
+          setAccept(data.canAccept);
+          setReject(data.canReject);
+          setInProgress(data.canInProgress);
+          setClose(data.canClose);
+          setCookie("cookie", data.token);
+          navigate("/");
+        }
       })
       .catch((error) => {
         console.error("Error during the fetch operation:", error);

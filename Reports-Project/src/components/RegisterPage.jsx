@@ -1,9 +1,11 @@
 import "./signIn.css";
 import Logo from "../assets/logo.jpg";
 import { useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 function RegisterPage() {
+  const [cookies, setCookie, removeCookie] = useCookies(["cookie"]);
   const handleBlur = (props) => {
     const input = props.target;
     const formisValid = () => {
@@ -31,58 +33,61 @@ function RegisterPage() {
     }
   };
   const password = useRef();
-  const validatePassword = (event) => {
-    const formisValid = () => {
-      input.classList.add("form-control");
-      input.classList.remove("is-invalid");
-      input.classList.add("is-valid");
-    };
-    const formisinValid = () => {
-      input.classList.add("form-control");
-      input.classList.remove("is-valid");
-      input.classList.add("is-invalid");
-    };
-    const input = event.target;
-    if (password.current.value > 0) {
-      formisValid();
-    } else if (input.value.length > 7 && input.value.length < 21) {
-      formisValid();
-    } else if (password.current.value !== input.value) {
-      formisinValid();
-    } else {
-      if (password.current.value === input.value) {
-        formisValid();
-        password.current.classList.add("form-control");
-        password.current.classList.remove("is-invalid");
-        password.current.classList.add("is-valid");
-      } else {
-        formisinValid();
-      }
-    }
-  };
   const userName = useRef();
   const phoneNumber = useRef();
+  const email = useRef();
+  const TC = useRef();
+  const navigate = useNavigate();
   const onRegister = () => {
     const Values = {
       name: userName.current.value,
       phoneNumber: phoneNumber.current.value,
       password: password.current.value,
+      tc: TC.current.value,
+      email: email.current.value,
     };
     fetch("https://complaintapi.kodunya.com/api/Users/SignUp", {
       method: "POST",
       headers: {
-        // Authorization : `bearer ${}`,
         "Content-Type": "application/json",
-        // Add any other headers if needed
       },
-      body: JSON.stringify(Values), // Convert the object to a JSON string
+      body: JSON.stringify(Values),
     })
       .then((response) => {
-        // console.log(resopnse.data.token);
-
-        return response.json();
+        if (response.status === 200) {
+          return response.json();
+        } else if (response.status === 401) {
+          return Swal.fire({
+            title: "The user is not defined",
+            text: "Check your Username and password",
+            icon: "error",
+          });
+        } else {
+          alert("error " + response.status);
+        }
       })
-      .then((data) => {})
+      .then((data) => {
+        console.log(data);
+        if (data.token) {
+          const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.onmouseenter = Swal.stopTimer;
+              toast.onmouseleave = Swal.resumeTimer;
+            },
+          });
+          Toast.fire({
+            icon: "success",
+            title: "Signed up successfully",
+          });
+          setCookie("cookie", data.token);
+          navigate("/");
+        }
+      })
       .catch((error) => {
         console.error("Error during the fetch operation:", error);
       });
@@ -101,15 +106,33 @@ function RegisterPage() {
       <div className="main me-7">
         <img src={Logo} width={250} />
         <div className="col-md-6 col-sm-12 ">
-          <div className="mt-lg-5">
+          <div className="mt-lg-3">
             <form>
               <div className="form-group">
+                <label>TC Number</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Please Enter Your TC Number"
+                  ref={TC}
+                  onBlur={handleBlur}
+                  required
+                />
                 <label>User Name</label>
                 <input
                   type="text"
                   className="form-control"
                   placeholder="Please Enter Your Username"
                   ref={userName}
+                  onBlur={handleBlur}
+                  required
+                />
+                <label>Email Adress</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  placeholder="Please Enter Your Email Address"
+                  ref={email}
                   onBlur={handleBlur}
                   required
                 />
@@ -138,20 +161,6 @@ function RegisterPage() {
                   ref={password}
                   required
                 />
-                <label htmlFor="inputPassword5" className="form-label">
-                  Repeat your Password
-                </label>
-                <input
-                  type="password"
-                  className="form-control"
-                  aria-describedby="passwordHelpBlock"
-                  placeholder="Please Enter Your Password"
-                  onBlur={validatePassword}
-                  required
-                />
-                <div id="passwordHelpBlock" className="form-text ">
-                  Your password must be 8-20 characters long
-                </div>
               </div>
               <button
                 type="button"
