@@ -13,8 +13,12 @@ function DetailPage() {
   const [messages, setMesages] = useState([]);
 
   const token = Cookies.get("cookie");
-  const { isStaff, canAccept, canReject, canInProgress, canClose } =
-    useContext(AuthContext);
+  const isStaff = Cookies.get("isStaff");
+  const canAccept = Cookies.get("canAccept");
+  const canReject = Cookies.get("canReject");
+  const canInProgress = Cookies.get("canInProgress");
+  const canClose = Cookies.get("canClose");
+  const getuserId = Cookies.get("userId");
 
   const handleButtonClick = (action, message, apiEndpoint) => {
     swal
@@ -86,7 +90,7 @@ function DetailPage() {
     setLoading(true);
     fetch(`https://complaintapi.kodunya.com/api/Complaints/${id}`, {
       headers: {
-        Authorization: "bearer " + token,
+        Authorization: `bearer ${token}`,
       },
     })
       .then((response) => response.json())
@@ -252,7 +256,13 @@ function DetailPage() {
         setTableContent((prevContent) => [
           <div
             className="d-flex flex-column"
-            style={{ flex: "65%", overflow: "scroll", overflowX: "hidden" }}
+            style={{
+              flex: "65%",
+              overflow: "scroll",
+              overflowX: "hidden",
+              // overflowY: "auto",
+              height: "calc(100vh - 66px)",
+            }}
           >
             <Link
               className=" position-absolute p-4 font-size link-secondary d-block text-decoration-none"
@@ -297,20 +307,21 @@ function DetailPage() {
             </div>
           </div>,
         ]);
+        console.log(data.messages);
         data.messages.forEach((message) => {
           let sender;
-          if (message.userId === data.userId) {
+          console.log(message.userId);
+          console.log(data);
+          if (message.userId === getuserId) {
             sender = (
               <div className="message my_msg h5">
-                <p className="bg-dark text-white"> {message.message}</p>
+                <p className="bg-dark text-white">{message.message}</p>
               </div>
             );
           } else {
             sender = (
               <div className="message friend_msg  text-white">
-                <p className="bg-secondary">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                </p>
+                <p className="bg-secondary">{message.message}</p>
               </div>
             );
           }
@@ -328,13 +339,15 @@ function DetailPage() {
       setTable(tableContent);
     }
   }, [loading, tableContent]);
-  const [AddMessage, setAddMessage] = useState(messages);
+  const [AddMessage, setAddMessage] = useState(
+    messages.slice(0, messages.length / 2)
+  );
+  const messageInput = useRef();
   const onMessageSend = (event) => {
-    event.preventDefault;
-    let message = event.target.previousElementSibling.value;
+    console.log("message Sent");
     const values = {
       complaintId: id,
-      message: message,
+      message: messageInput.current.value,
     };
     fetch("https://complaintapi.kodunya.com/api/ComplaintMessages", {
       method: "POST",
@@ -354,12 +367,17 @@ function DetailPage() {
         console.error("Error during the fetch operation:", error);
       });
     setAddMessage((prevContent) => [
-      ...prevContent,
       <div className="message my_msg h5">
-        <p className="bg-dark text-white">{message}</p>
+        <p className="bg-dark text-white">{messageInput.current.value}</p>
       </div>,
     ]);
-    event.target.previousElementSibling.value = "";
+  };
+  const SendButton = useRef();
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      onMessageSend();
+      window.scrollTo(0, document.body.scrollHeight);
+    }
   };
   return (
     <div className="d-flex">
@@ -383,12 +401,19 @@ function DetailPage() {
         </div>
 
         <div className="chat_input bg-secondary opacity-50">
-          <input type="text" placeholder="Type a message" />
-          <FontAwesomeIcon
-            className="icon text-dark"
-            icon={faShare}
-            onClick={onMessageSend}
+          <input
+            type="text"
+            placeholder="Type a message"
+            ref={messageInput}
+            onKeyPress={handleKeyPress}
           />
+          <div
+            onClick={onMessageSend}
+            ref={SendButton}
+            style={{ cursor: "pointer" }}
+          >
+            <FontAwesomeIcon className="icon text-dark" icon={faShare} />
+          </div>
         </div>
       </div>
     </div>

@@ -61,9 +61,9 @@ function MainPage(props) {
       category: record.Type,
       address: record.Adress,
       title: record.title,
-      userId: "",
       image: record.image,
     };
+    console.log(Values);
     fetch("https://complaintapi.kodunya.com/api/Complaints", {
       method: "POST",
       headers: {
@@ -76,11 +76,7 @@ function MainPage(props) {
       .then((response) => {
         return response.json();
       })
-      .then((data) => {})
-      .catch((error) => {
-        console.error("Error during the fetch operation:", error);
-      });
-
+      .then((data) => {});
     handleCloseModal();
   };
 
@@ -97,6 +93,7 @@ function MainPage(props) {
     })
       .then((response) => response.json())
       .then((data) => {
+        console.log(data);
         data.forEach((data) => {
           let status;
           if (data.length === 0) {

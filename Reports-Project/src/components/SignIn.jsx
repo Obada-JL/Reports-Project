@@ -5,7 +5,15 @@ import { useRef } from "react";
 import { useCookies } from "react-cookie";
 import { useAuth } from "../AppContext.jsx";
 function SignIn() {
-  const [cookies, setCookie, removeCookie] = useCookies(["cookie"]);
+  const [cookies, setCookie, removeCookie] = useCookies([
+    "cookie",
+    "isStaff",
+    "canAccept",
+    "canReject",
+    "canInProgress",
+    "canClose",
+    "userId",
+  ]);
   const handleBlur = (props) => {
     const input = props.target;
     const formisValid = () => {
@@ -53,6 +61,21 @@ function SignIn() {
     })
       .then((response) => {
         if (response.status === 200) {
+          const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.onmouseenter = Swal.stopTimer;
+              toast.onmouseleave = Swal.resumeTimer;
+            },
+          });
+          Toast.fire({
+            icon: "success",
+            title: "Signed in successfully",
+          });
           return response.json();
         } else if (response.status === 401) {
           return Swal.fire({
@@ -65,13 +88,15 @@ function SignIn() {
         }
       })
       .then((data) => {
+        console.log(data);
         if (data.token) {
-          setStaffStatus(data.isStaff);
-          setAccept(data.canAccept);
-          setReject(data.canReject);
-          setInProgress(data.canInProgress);
-          setClose(data.canClose);
+          setCookie("isStaff", data.isStaff);
+          setCookie("canAccept", data.canAccept);
+          setCookie("canReject", data.canReject);
+          setCookie("canInProgress", data.canInProgress);
+          setCookie("canClose", data.canClose);
           setCookie("cookie", data.token);
+          setCookie("userId", data.userID);
           navigate("/");
         }
       })

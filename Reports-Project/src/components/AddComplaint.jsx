@@ -43,7 +43,7 @@ function AddComplaint(props) {
     // Trigger a click on the hidden file input
     document.getElementById("fileInput").click();
   }
-  const [filteringButton, setFilteringButton] = useState("Other");
+  const [filteringButton, setFilteringButton] = useState("Diğer");
   const ComplaintTypes = (event) => {
     let complaintType = event.target.outerText.split(" ")[0];
     setFilteringButton(complaintType);
@@ -100,27 +100,52 @@ function AddComplaint(props) {
           <ul className="dropdown-menu">
             <li>
               <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p>Electricity</p>
+                <p>Tüm</p>
               </a>
             </li>
             <li>
               <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p> Water</p>
+                <p> Yol ve çevre düzeni</p>
               </a>
             </li>
             <li>
               <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p> Gas</p>
+                <p> Kaski</p>
               </a>
             </li>
             <li>
               <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p>Internet</p>
+                <p>Armadaş</p>
               </a>
             </li>
             <li>
               <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p>Other</p>
+                <p>Akedaş</p>
+              </a>
+            </li>
+            <li>
+              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+                <p>Sokak Hayvanı</p>
+              </a>
+            </li>
+            <li>
+              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+                <p>Çöp Birikmesi</p>
+              </a>
+            </li>
+            <li>
+              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+                <p>Ulaşım İhbarı</p>
+              </a>
+            </li>
+            <li>
+              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+                <p>Zabıta</p>
+              </a>
+            </li>
+            <li>
+              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+                <p>Diğer</p>
               </a>
             </li>
           </ul>
@@ -152,6 +177,7 @@ function AddComplaint(props) {
           className="d-none"
           ref={file}
           onChange={setUrlChange}
+          accept=".jpg,.jpeg,.png"
           required
         />
         <div className="d-flex gap-3 align-items-center">

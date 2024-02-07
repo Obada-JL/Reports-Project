@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import "./AdminDetails.css";
 import Cookies from "js-cookie";
-import { TRUE, Value } from "sass";
 const token = Cookies.get("cookie");
 function AddAdmin(props) {
   const Cancel = () => {
@@ -19,7 +18,8 @@ function AddAdmin(props) {
   const canInProgress = useRef();
   const canClose = useRef();
   const canManageAdmins = useRef();
-  const onAddAdmin = () => {
+  const onAddAdmin = (e) => {
+    e.preventDefault();
     let premissions = [];
     console.log(canReject.current.classList.contains("selected"));
     console.log(canReject.current.classList);
@@ -48,7 +48,7 @@ function AddAdmin(props) {
     } else {
       premissions.push(false);
     }
-    const Values = {
+    props.onSubmit({
       name: Name.current.value,
       phoneNumber: PhoneNumber.current.value,
       email: Email.current.value,
@@ -59,27 +59,7 @@ function AddAdmin(props) {
       canInProgress: premissions[2],
       canClose: premissions[3],
       manageAdmins: premissions[4],
-    };
-    console.log(Values);
-    fetch("https://complaintapi.kodunya.com/api/Users", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(Values),
-    })
-      .then((response) => {
-        console.log(response);
-        return response.json();
-      })
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((error) => {
-        console.error("Error during the fetch operation:", error);
-      });
-    props.onSubmit();
+    });
   };
   const premissionContainer = useRef();
   const AddSelectedClass = (e) => {

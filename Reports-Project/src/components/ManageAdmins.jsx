@@ -5,11 +5,11 @@ import { useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
 import ModalComponent from "./AddComplaint";
 import Cookies from "js-cookie";
+import "./MainPage.css";
 import AdminDetails from "./AdminDetails";
 import AddAdmin from "./AddAdmin";
 const token = Cookies.get("cookie");
 function AdminPage() {
-  // description - search in navbar - filter complaints
   const modalStyles = {
     content: {
       top: "50%",
@@ -28,29 +28,6 @@ function AdminPage() {
     },
   };
   const [tableContent, setTableContent] = useState([]);
-  const formSubmitHandler = (admin) => {
-    console.log(admin);
-    setTableContent((prevContent) => [
-      <tr>
-        <td>{admin.name}</td>
-        <td>{admin.email}</td>
-        <td>{admin.phoneNumber}</td>
-        <td>
-          <FontAwesomeIcon
-            icon={faPenToSquare}
-            className="bg-warning p-1  rounded-start rounded-end text-white me-1"
-          />
-          <FontAwesomeIcon
-            icon={faTrashCan}
-            className="bg-danger p-1  rounded-start rounded-end text-white"
-          />
-        </td>
-      </tr>,
-      ...prevContent,
-    ]);
-    handleCloseModal();
-  };
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const handleOpenModal = () => {
@@ -69,7 +46,42 @@ function AdminPage() {
     let complaintType = event.target.outerText.split(" ")[0];
     setFilteringButton(complaintType);
   };
+
+  const [loading, setLoading] = useState(false);
+
+  const submitHandler = (record) => {
+    const Values = {
+      name: record.name,
+      phoneNumber: record.phoneNumber,
+      email: record.email,
+      password: record.password,
+      category: record.category,
+      canAccept: record.canAccept,
+      canReject: record.canReject,
+      canInProgress: record.canInProgress,
+      canClose: record.canClose,
+      manageAdmins: record.manageAdmins,
+    };
+    console.log(Values);
+    fetch("https://complaintapi.kodunya.com/api/Users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(Values),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error during the fetch operation:", error);
+      });
+    handleCloseModal();
+  };
   useEffect(() => {
+    setLoading(true);
     fetch("https://complaintapi.kodunya.com/api/Users", {
       method: "GET",
       headers: {
@@ -77,14 +89,12 @@ function AdminPage() {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then((response) => {
-        return response.json();
-      })
+      .then((response) => response.json())
       .then((data) => {
         console.log(data);
         data.forEach((admin) => {
           setTableContent((prevContent) => [
-            <tr>
+            <tr onClick={setIsDetailModalOpen}>
               <td>{admin.name}</td>
               <td>{admin.email}</td>
               <td>{admin.phoneNumber}</td>
@@ -104,14 +114,25 @@ function AdminPage() {
           ]);
         });
         {
+          tableContent.slice(Math.ceil(tableContent.length / 2));
         }
         return;
       })
       .catch((error) => {
         console.error("Error during the fetch operation:", error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
-
+  const [table, setTable] = useState(<div className="custom-loader"></div>);
+  useEffect(() => {
+    if (loading === true) {
+      setTable(<div className="custom-loader"></div>);
+    } else {
+      setTable(tableContent.slice(0, Math.ceil(tableContent.length) / 2));
+    }
+  }, [loading, tableContent]);
   return (
     <>
       <div className="d-flex flex-column w-100 justify-content-center align-items-center mt-3">
@@ -166,7 +187,8 @@ function AdminPage() {
             <th>Phone Number</th>
             <th></th>
           </tr>
-          {tableContent.slice(Math.ceil(tableContent.length / 2))}
+          {/* {tableContent.slice(Math.ceil(tableContent.length / 2))} */}
+          {table}
         </tbody>
       </table>
       <Modal
@@ -175,7 +197,7 @@ function AdminPage() {
         contentLabel="Modal"
         style={modalStyles}
       >
-        <AddAdmin onCancel={handleCloseModal} onSubmit={handleCloseModal} />
+        <AddAdmin onCancel={handleCloseModal} onSubmit={submitHandler} />
       </Modal>
       <Modal
         isOpen={isDetailModalOpen}
@@ -183,10 +205,7 @@ function AdminPage() {
         contentLabel="Modal"
         style={modalStyles}
       >
-        <AdminDetails
-          onCancel={handleCloseModal}
-          onFormSubmit={formSubmitHandler}
-        />
+        <AdminDetails onCancel={handleCloseModal} />
       </Modal>
     </>
   );

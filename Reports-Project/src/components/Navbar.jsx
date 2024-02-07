@@ -5,52 +5,42 @@ function NavBar() {
   const [cookies, setCookie, removeCookie] = useCookies(["cookie"]);
   const navigate = useNavigate();
   const onLogout = () => {
-    removeCookie("cookie");
-    navigate("/signIn");
+    Swal.fire({
+      title: "Are you sure to Log out?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Logout",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        removeCookie("cookie");
+        removeCookie("isStaff");
+        removeCookie("canAccept");
+        removeCookie("canReject");
+        removeCookie("canInProgress");
+        removeCookie("canClose");
+        removeCookie("userId");
+        navigate("/signIn");
+        Swal.fire({
+          title: "Logged out successfuly!",
+          icon: "success",
+        });
+      }
+    });
   };
   return (
     <nav className="navbar navbar-expand-lg bg-dark">
       <div className="container-fluid">
-        <img src={Logo} width={50} />
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNavDropdown"
-          aria-controls="navbarNavDropdown"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNavDropdown">
-          <ul className="navbar-nav">
-            <li className="nav-item">
-              <a
-                className="nav-link active text-white"
-                aria-current="page"
-                href="#"
-              ></a>
-            </li>
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle text-white"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Account Settings
-              </a>
-              <ul className="dropdown-menu">
-                <li>
-                  <a className="dropdown-item" href="#" onClick={onLogout}>
-                    Logout
-                  </a>
-                </li>
-              </ul>
-            </li>
-          </ul>
+        <div className="d-flex gap-3 h-50">
+          <img src={Logo} width={50} />
+          <div className="d-flex align-items-center">
+            <button className=" btn btn-danger" onClick={onLogout}>
+              Logout
+            </button>
+          </div>
         </div>
+
         <div>
           <form className="d-flex" role="search">
             <input
