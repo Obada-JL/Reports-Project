@@ -80,6 +80,38 @@ function AdminPage() {
       });
     handleCloseModal();
   };
+  // const DeleteAdmins = (data) => {
+  //   console.log(data);
+
+  //   fetch(`https://complaintapi.kodunya.com/api/Users/${data}`, {
+  //     method: "DELETE",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //   })
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       Swal.fire({
+  //         title: "Are you sure?",
+  //         text: "You won't be able to revert this!",
+  //         icon: "warning",
+  //         showCancelButton: true,
+  //         confirmButtonColor: "#3085d6",
+  //         cancelButtonColor: "#d33",
+  //         confirmButtonText: "Yes, delete it!",
+  //       }).then((result) => {
+  //         if (result.isConfirmed) {
+  //           console.log(data);
+  //           Swal.fire({
+  //             title: "Deleted!",
+  //             text: "Your file has been deleted.",
+  //             icon: "success",
+  //           });
+  //         }
+  //       });
+  //     });
+  // };
   useEffect(() => {
     setLoading(true);
     fetch("https://complaintapi.kodunya.com/api/Users", {
@@ -93,20 +125,44 @@ function AdminPage() {
       .then((data) => {
         console.log(data);
         data.forEach((admin) => {
+          let premissionsArray = [];
+          if (admin.canAccept) {
+            premissionsArray.push("Accept" + " , ");
+          } else {
+          }
+          if (admin.canReject) {
+            premissionsArray.push("Reject" + " , ");
+          }
+          if (admin.canInProgress) {
+            premissionsArray.push("In Progress" + " , ");
+          } else {
+          }
+          if (admin.canClose) {
+            premissionsArray.push("Close" + " , ");
+          } else {
+          }
+          if (admin.manageAdmins) {
+            premissionsArray.push("Manage Admins" + " , ");
+          } else {
+          }
           setTableContent((prevContent) => [
-            <tr onClick={setIsDetailModalOpen}>
+            <tr>
               <td>{admin.name}</td>
               <td>{admin.email}</td>
               <td>{admin.phoneNumber}</td>
+              <td>{premissionsArray}</td>
               <td>
                 <FontAwesomeIcon
                   icon={faPenToSquare}
                   className="bg-warning p-1  rounded-start rounded-end text-white me-1"
                   onClick={handleDetailOpenModal}
+                  style={{ cursor: "pointer" }}
                 />
                 <FontAwesomeIcon
                   icon={faTrashCan}
                   className="bg-danger p-1  rounded-start rounded-end text-white"
+                  // onClick={DeleteAdmins(admin.id)}
+                  style={{ cursor: "pointer" }}
                 />
               </td>
             </tr>,
@@ -133,47 +189,18 @@ function AdminPage() {
       setTable(tableContent.slice(0, Math.ceil(tableContent.length) / 2));
     }
   }, [loading, tableContent]);
+  const EditAdmin = (props) => {
+    console.log(props);
+  };
   return (
     <>
       <div className="d-flex flex-column w-100 justify-content-center align-items-center mt-3">
         <h1>All Admins</h1>
       </div>
       <div className="mt-5 ms-5 me-5 d-flex justify-content-between  border-bottom border-dark pb-3 border-3 rounded-start rounded-end">
-        <div className="dropdown">
-          <button
-            className="btn btn-secondary dropdown-toggle"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            {filteringButton}
-          </button>
-          <ul className="dropdown-menu">
-            <li>
-              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p>All Complaints</p>
-              </a>
-            </li>
-            <li>
-              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p> Accepted Complaints</p>
-              </a>
-            </li>
-            <li>
-              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p> Rejected Complaints</p>
-              </a>
-            </li>
-            <li>
-              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p>Pending Complaints</p>
-              </a>
-            </li>
-          </ul>
-        </div>
         <button
           type="button"
-          className="btn btn-success"
+          className="btn btn-success ms-3"
           onClick={handleOpenModal}
         >
           Add Admins <span>&#43;</span>
@@ -185,6 +212,7 @@ function AdminPage() {
             <th>Name</th>
             <th>Email</th>
             <th>Phone Number</th>
+            <th>Premissions</th>
             <th></th>
           </tr>
           {/* {tableContent.slice(Math.ceil(tableContent.length / 2))} */}
@@ -205,7 +233,7 @@ function AdminPage() {
         contentLabel="Modal"
         style={modalStyles}
       >
-        <AdminDetails onCancel={handleCloseModal} />
+        <AdminDetails onCancel={handleCloseModal} onSubmit={EditAdmin} />
       </Modal>
     </>
   );

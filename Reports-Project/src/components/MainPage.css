@@ -8,7 +8,7 @@
     linear-gradient(90deg, #766df440 50%, #766df4bf 0) center/100% 4px;
   background-repeat: no-repeat;
   animation: s3 1s infinite steps(12);
-  margin-left: 210%;
+  margin-left: 250%;
   margin-top: 50px;
 }
 
@@ -31,9 +31,6 @@
   100% {
     transform: rotate(1turn);
   }
-}
-tr {
-  cursor: pointer;
 }
 .bgStatus0 {
   background-color: #6c757d !important;

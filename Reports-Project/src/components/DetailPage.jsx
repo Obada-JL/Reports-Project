@@ -40,7 +40,11 @@ function DetailPage() {
             },
           })
             .then((response) => response.json())
-            .then((data) => {});
+            .then((data) => {
+              setTimeout(() => {
+                window.location.reload(true);
+              }, 2000);
+            });
 
           swal.fire(
             `${action}d!`,
@@ -109,10 +113,14 @@ function DetailPage() {
         }
         let isUserStaff = "";
 
-        if (isStaff) {
+        if (isStaff === "true") {
+          console.log(isStaff);
           if (status === "Accepted") {
-            if (canInProgress) {
-              if (canClose) {
+            console.log(canClose);
+            if (canInProgress == "true") {
+              console.log("hhhhhhhhh");
+              if (canClose === "true") {
+                console.log("sssssssssss");
                 isUserStaff = (
                   <div className="d-flex gap-2">
                     <button
@@ -127,7 +135,7 @@ function DetailPage() {
                       type="button"
                       onClick={onChangeClosed}
                     >
-                      Closed
+                      Close
                     </button>
                   </div>
                 );
@@ -143,9 +151,19 @@ function DetailPage() {
                 );
               }
             } else {
+              isUserStaff = (
+                <button
+                  className="btn btn-warning"
+                  type="button"
+                  onClick={onChangeInProgress}
+                >
+                  In Progress
+                </button>
+              );
             }
-            if (canClose) {
-              if (canInProgress) {
+            if (canClose === "true") {
+              console.log("closed");
+              if (canInProgress === "true") {
                 isUserStaff = (
                   <div className="d-flex gap-2">
                     <button
@@ -171,15 +189,26 @@ function DetailPage() {
                     type="button"
                     onClick={onChangeClosed}
                   >
-                    Closed
+                    Close
                   </button>
                 );
               }
             } else {
+              console.log("else");
+              isUserStaff = (
+                <button
+                  className="btn btn-info"
+                  type="button"
+                  onClick={onChangeClosed}
+                >
+                  Close
+                </button>
+              );
             }
           } else {
-            if (canAccept) {
-              if (canReject) {
+            console.log("GGGgggggg");
+            if (canAccept === "true") {
+              if (canReject === "true") {
                 isUserStaff = (
                   <div className="d-flex gap-2">
                     <button
@@ -210,10 +239,19 @@ function DetailPage() {
                 );
               }
             } else {
+              isUserStaff = (
+                <button
+                  className="btn btn-success"
+                  type="button"
+                  onClick={onChangeAccept}
+                >
+                  Accept
+                </button>
+              );
             }
 
-            if (canReject) {
-              if (canAccept) {
+            if (canReject === "true") {
+              if (canAccept === "true") {
                 isUserStaff = (
                   <div className="d-flex gap-2">
                     <button
@@ -233,6 +271,7 @@ function DetailPage() {
                   </div>
                 );
               } else {
+                console.log("reject1");
                 isUserStaff = (
                   <button
                     className="btn btn-danger"
@@ -244,14 +283,22 @@ function DetailPage() {
                 );
               }
             } else {
+              console.log("reject2");
+              isUserStaff = (
+                <button
+                  className="btn btn-danger"
+                  type="button"
+                  onClick={onChangeReject}
+                >
+                  Reject
+                </button>
+              );
             }
           }
         } else {
-          isUserStaff = (
-            <td className={`text-white bgStatus${data.status} p-2 rounded`}>
-              {status}
-            </td>
-          );
+        }
+        if (status === "Rejected" || status === "Closed") {
+          isUserStaff = "";
         }
         setTableContent((prevContent) => [
           <div
@@ -273,22 +320,34 @@ function DetailPage() {
             <h1 className="d-flex justify-content-center pt-2">{data.title}</h1>
             <div className="d-flex flex-50 h5 justify-content-around pt-2">
               {isUserStaff}
-              <div className="d-flex gap-2">
-                <p>Date:</p> <p>{data.createdDate.split("T")[0]}</p>
-              </div>
+              <td className={`text-white bgStatus${data.status} p-2 rounded`}>
+                {status}
+              </td>
             </div>
-            <p className="d-flex justify-content-center h5 pb-3 border-bottom">
+            <p className="d-flex justify-content-center h5 pb-2 mt-3 border-bottom gap-5">
+              {" "}
+              <div className="d-flex gap-2 align-items-center">
+                <p className="h5">Date:</p>{" "}
+                <p className="h5">{data.createdDate.split("T")[0]}</p>
+              </div>
               {data.category}
             </p>
             <div className="d-flex justify-content-between p-2">
               <div>
-                <div className="pt-1 ">
-                  <p className="h4 ms-2 ">Adress:</p>
-                  <p className="p-2">{data.address}</p>
+                <div className="pt-1 text-break">
+                  <p className="h4 ms-2 text-break">Adress:</p>
+                  <p className="p-2" style={{ width: "calc(65vw - 400px)" }}>
+                    {data.address}
+                  </p>
                 </div>
                 <div>
-                  <p className="h4 ms-2 ">Description:</p>
-                  <p className="p-2">{data.description}</p>
+                  <p className="h4 ms-2 text-break">Description:</p>
+                  <p
+                    className="p-2 text-break"
+                    style={{ width: "calc(65vw - 400px)" }}
+                  >
+                    {data.description}
+                  </p>
                 </div>
               </div>
               <img
@@ -307,21 +366,25 @@ function DetailPage() {
             </div>
           </div>,
         ]);
-        console.log(data.messages);
         data.messages.forEach((message) => {
           let sender;
-          console.log(message.userId);
-          console.log(data);
           if (message.userId === getuserId) {
             sender = (
               <div className="message my_msg h5">
-                <p className="bg-dark text-white">{message.message}</p>
+                <p className="bg-dark text-white text-break">
+                  {message.message}
+                </p>
               </div>
             );
           } else {
             sender = (
-              <div className="message friend_msg  text-white">
-                <p className="bg-secondary">{message.message}</p>
+              <div className="message friend_msg  text-white w-25 text-left">
+                <p
+                  className="bg-secondary text-break w-25"
+                  style={{ width: "50vw", textWrap: "wrap", textAlign: "left" }}
+                >
+                  {message.message}
+                </p>
               </div>
             );
           }

@@ -1,5 +1,8 @@
 import "./AdminDetails.css";
 function AdminDetails(props) {
+  const Cancel = () => {
+    props.onCancel();
+  };
   return (
     <>
       <h1 className="border-bottom border-3 d-flex justify-content-center p-2">
@@ -54,6 +57,12 @@ function AdminDetails(props) {
           <input type="checkbox" />
           <span>Change Admins</span>
         </label>
+      </div>
+      <div className="d-flex justify-content-end  p-2 gap-2">
+        <button className="btn btn-secondary" onClick={Cancel}>
+          Cancel
+        </button>
+        <button className="btn btn-success">Refresh</button>
       </div>
     </>
   );

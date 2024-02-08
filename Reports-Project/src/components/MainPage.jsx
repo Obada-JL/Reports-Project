@@ -68,7 +68,7 @@ function MainPage(props) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "bearer " + cookieValue,
+        Authorization: "bearer " + token,
         // Add any other headers if needed
       },
       body: JSON.stringify(Values), // Convert the object to a JSON string
@@ -80,7 +80,7 @@ function MainPage(props) {
     handleCloseModal();
   };
 
-  const cookieValue = Cookies.get("cookie");
+  const token = Cookies.get("cookie");
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     setLoading(true);
@@ -88,12 +88,11 @@ function MainPage(props) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${cookieValue}`,
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         data.forEach((data) => {
           let status;
           if (data.length === 0) {
@@ -111,7 +110,7 @@ function MainPage(props) {
             }
             setTableContent((prevContent) => [
               <tr onClick={OpenDetailPage} id={data.id}>
-                <td>{data.title}</td>
+                <td className="text-break w-25">{data.title}</td>
                 <td>{data.category}</td>
                 <td>{data.createdDate.split("T")[0]}</td>
                 <td className={`text-white bgStatus${data.status} p-2 rounded`}>
@@ -187,49 +186,63 @@ function MainPage(props) {
     const trElementId = trElement.id;
     navigate(`/${trElementId}`);
   };
+  const [mainTitle, setMainTitle] = useState("My Complaints");
+  const [head, setHead] = useState();
+  const isStaff = Cookies.get("isStaff");
+  useEffect(() => {
+    if (isStaff === "true") {
+      setMainTitle("All Complaints");
+      setHead();
+    } else {
+      setMainTitle("My Complaints");
+      setHead(
+        <div className="mt-5 ms-5 me-5 d-flex justify-content-between  border-bottom border-dark pb-3 border-3 rounded-start rounded-end">
+          <div className="dropdown">
+            <button
+              className="btn btn-secondary dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              {filteringButton}
+            </button>
+            <ul className="dropdown-menu">
+              <li>
+                <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+                  <p>All Complaints</p>
+                </a>
+              </li>
+              <li>
+                <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+                  <p> Accepted Complaints</p>
+                </a>
+              </li>
+              <li>
+                <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+                  <p> Rejected Complaints</p>
+                </a>
+              </li>
+              <li>
+                <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
+                  <p>Pending Complaints</p>
+                </a>
+              </li>
+            </ul>
+          </div>
+          <Link className="btn btn-success" onClick={handleModalOpen}>
+            Add Complaints <span>&#43;</span>
+          </Link>
+        </div>
+      );
+    }
+  }, []);
 
   return (
     <>
       <div className="d-flex flex-column w-100 justify-content-center align-items-center mt-3">
-        <h1>My Complaints</h1>
+        <h1>{mainTitle}</h1>
       </div>
-      <div className="mt-5 ms-5 me-5 d-flex justify-content-between  border-bottom border-dark pb-3 border-3 rounded-start rounded-end">
-        <div className="dropdown">
-          <button
-            className="btn btn-secondary dropdown-toggle"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
-            {filteringButton}
-          </button>
-          <ul className="dropdown-menu">
-            <li>
-              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p>All Complaints</p>
-              </a>
-            </li>
-            <li>
-              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p> Accepted Complaints</p>
-              </a>
-            </li>
-            <li>
-              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p> Rejected Complaints</p>
-              </a>
-            </li>
-            <li>
-              <a className="dropdown-item" href="#" onClick={ComplaintTypes}>
-                <p>Pending Complaints</p>
-              </a>
-            </li>
-          </ul>
-        </div>
-        <Link className="btn btn-success" onClick={handleModalOpen}>
-          Add Complaints <span>&#43;</span>
-        </Link>
-      </div>
+      {head}
       <table className="table table-hover table-striped mt-5 ">
         <tbody ref={tableBody}>
           <tr className="border-0 border-bottom border-3 border-dark">
