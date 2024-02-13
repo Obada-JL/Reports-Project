@@ -79,7 +79,14 @@ function MainPage(props) {
       .then((data) => {});
     handleCloseModal();
   };
-
+  const onClick = (e) => {
+    if (e.target.tagName === "TD") {
+      OpenDetailPage(e);
+    } else {
+      console.log(e.target.tagName);
+      DeleteComplaint(e);
+    }
+  };
   const token = Cookies.get("cookie");
   const [loading, setLoading] = useState(false);
   useEffect(() => {
@@ -109,7 +116,7 @@ function MainPage(props) {
               status = "Closed";
             }
             setTableContent((prevContent) => [
-              <tr onClick={OpenDetailPage} id={data.id}>
+              <tr onClick={onClick} id={data.id}>
                 <td className="text-break w-25">{data.title}</td>
                 <td>{data.category}</td>
                 <td>{data.createdDate.split("T")[0]}</td>
@@ -124,6 +131,8 @@ function MainPage(props) {
                   <FontAwesomeIcon
                     icon={faTrashCan}
                     className="bg-danger p-1  rounded-start rounded-end text-white"
+                    onClick={onClick}
+                    style={{ cursor: "pointer" }}
                   />
                 </td>
               </tr>,
@@ -160,6 +169,41 @@ function MainPage(props) {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setIsOpenModal(false);
+  };
+  const DeleteComplaint = (e) => {
+    console.log(e.currentTarget.closest("tr").id);
+    const trId = e.currentTarget.closest("tr").id;
+    Swal.fire({
+      title: "Are you sure to Delete This Complaint ?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Delete",
+    }).then((result) => {
+      console.log(result.isConfirmed);
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Deleted successfuly!",
+          icon: "success",
+        });
+        fetch(`https://complaintapi.kodunya.com/api/Complaints/${trId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "bearer " + token,
+            // Add any other headers if needed
+          },
+        }).then((response) => {
+          response.json();
+        });
+        setTimeout(() => {
+          window.location.reload(true);
+        }, 2000);
+      } else {
+        return;
+      }
+    });
   };
   const [filteringButton, setFilteringButton] = useState("All");
   const tableBody = useRef();

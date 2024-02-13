@@ -1,13 +1,14 @@
 import Logo from "../assets/logo.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrashCan } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
 import ModalComponent from "./AddComplaint";
 import Cookies from "js-cookie";
 import "./MainPage.css";
 import AdminDetails from "./AdminDetails";
 import AddAdmin from "./AddAdmin";
+import { useAuth } from "../AppContext";
 const token = Cookies.get("cookie");
 function AdminPage() {
   const modalStyles = {
@@ -33,19 +34,16 @@ function AdminPage() {
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
-  const handleDetailOpenModal = () => {
+  const [AdminData, setAdminData] = useState({});
+  const handleDetailOpenModal = (e) => {
+    setAdminData(e);
     setIsDetailModalOpen(true);
   };
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setIsDetailModalOpen(false);
   };
-  const [filteringButton, setFilteringButton] = useState("All");
   const tableBody = useRef();
-  const ComplaintTypes = (event) => {
-    let complaintType = event.target.outerText.split(" ")[0];
-    setFilteringButton(complaintType);
-  };
 
   const [loading, setLoading] = useState(false);
 
@@ -80,38 +78,41 @@ function AdminPage() {
       });
     handleCloseModal();
   };
-  // const DeleteAdmins = (data) => {
-  //   console.log(data);
-
-  //   fetch(`https://complaintapi.kodunya.com/api/Users/${data}`, {
-  //     method: "DELETE",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       Swal.fire({
-  //         title: "Are you sure?",
-  //         text: "You won't be able to revert this!",
-  //         icon: "warning",
-  //         showCancelButton: true,
-  //         confirmButtonColor: "#3085d6",
-  //         cancelButtonColor: "#d33",
-  //         confirmButtonText: "Yes, delete it!",
-  //       }).then((result) => {
-  //         if (result.isConfirmed) {
-  //           console.log(data);
-  //           Swal.fire({
-  //             title: "Deleted!",
-  //             text: "Your file has been deleted.",
-  //             icon: "success",
-  //           });
-  //         }
-  //       });
-  //     });
-  // };
+  const DeleteAdmins = (data) => {
+    console.log(data.currentTarget.closest("tr").id);
+    const adminId = data.currentTarget.closest("tr").id;
+    fetch(`https://complaintapi.kodunya.com/api/Users/${adminId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        Swal.fire({
+          title: "Are you sure?",
+          text: "You won't be able to revert this!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, delete it!",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            console.log(data);
+            Swal.fire({
+              title: "Deleted!",
+              text: "Your file has been deleted.",
+              icon: "success",
+            });
+            setTimeout(() => {
+              window.location.reload(true);
+            }, 2000);
+          }
+        });
+      });
+  };
   useEffect(() => {
     setLoading(true);
     fetch("https://complaintapi.kodunya.com/api/Users", {
@@ -125,6 +126,7 @@ function AdminPage() {
       .then((data) => {
         console.log(data);
         data.forEach((admin) => {
+          console.log(admin);
           let premissionsArray = [];
           if (admin.canAccept) {
             premissionsArray.push("Accept" + " , ");
@@ -146,7 +148,7 @@ function AdminPage() {
           } else {
           }
           setTableContent((prevContent) => [
-            <tr>
+            <tr id={admin.id}>
               <td>{admin.name}</td>
               <td>{admin.email}</td>
               <td>{admin.phoneNumber}</td>
@@ -155,13 +157,21 @@ function AdminPage() {
                 <FontAwesomeIcon
                   icon={faPenToSquare}
                   className="bg-warning p-1  rounded-start rounded-end text-white me-1"
-                  onClick={handleDetailOpenModal}
+                  onClick={() =>
+                    handleDetailOpenModal({
+                      name: admin.name,
+                      email: admin.email,
+                      phoneNumber: admin.phoneNumber,
+                      permissions: premissionsArray,
+                      id: admin.id,
+                    })
+                  }
                   style={{ cursor: "pointer" }}
                 />
                 <FontAwesomeIcon
                   icon={faTrashCan}
                   className="bg-danger p-1  rounded-start rounded-end text-white"
-                  // onClick={DeleteAdmins(admin.id)}
+                  onClick={DeleteAdmins}
                   style={{ cursor: "pointer" }}
                 />
               </td>
@@ -192,6 +202,7 @@ function AdminPage() {
   const EditAdmin = (props) => {
     console.log(props);
   };
+
   return (
     <>
       <div className="d-flex flex-column w-100 justify-content-center align-items-center mt-3">
@@ -233,7 +244,11 @@ function AdminPage() {
         contentLabel="Modal"
         style={modalStyles}
       >
-        <AdminDetails onCancel={handleCloseModal} onSubmit={EditAdmin} />
+        <AdminDetails
+          onCancel={handleCloseModal}
+          onSubmit={EditAdmin}
+          data={AdminData}
+        />
       </Modal>
     </>
   );
