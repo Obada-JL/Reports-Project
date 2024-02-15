@@ -11,6 +11,7 @@ import PageLayout from "./components/PageLayout";
 import NavBar from "./components/Navbar";
 import { AuthProvider } from "./AppContext";
 import AdminDetails from "./components/AdminDetails";
+import GridExample from "./components/Paginate";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
       { path: "/:id", element: <DetailPage /> },
       { path: "admins", element: <AdminPage /> },
       { path: "admins/:id", element: <AdminDetails /> },
+      { path: "paginate", element: <GridExample /> },
     ],
   },
   {

@@ -90,67 +90,67 @@ function MainPage(props) {
   };
   const token = Cookies.get("cookie");
   const [loading, setLoading] = useState(false);
-  // useEffect(() => {
-  //   setLoading(true);
-  //   fetch("https://complaintapi.kodunya.com/api/Complaints", {
-  //     method: "GET",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: `Bearer ${token}`,
-  //     },
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       data.forEach((data) => {
-  //         let status;
-  //         if (data.length === 0) {
-  //         } else {
-  //           if (data.status === 0) {
-  //             status = "Pending";
-  //           } else if (data.status === 1) {
-  //             status = "Accepted";
-  //           } else if (data.status === 2) {
-  //             status = "Rejected";
-  //           } else if (data.status === 3) {
-  //             status = "InProgress";
-  //           } else if (data.status === 4) {
-  //             status = "Closed";
-  //           }
-  //           setTableContent((prevContent) => [
-  //             <tr
-  //               onClick={onClick}
-  //               id={data.id}
-  //               className="border-bottom border-1"
-  //               style={{ cursor: "pointer" }}
-  //             >
-  //               <td className="text-break w-25">{data.title}</td>
-  //               <td>{data.category}</td>
-  //               <td>{data.createdDate.split("T")[0]}</td>
-  //               <td className={`text-white bgStatus${data.status} p-2`}>
-  //                 {status}
-  //               </td>
-  //               <td>
-  //                 <FontAwesomeIcon
-  //                   icon={faTrashCan}
-  //                   className="bg-danger p-1  rounded-start rounded-end text-white ms-3"
-  //                   onClick={onClick}
-  //                   style={{ cursor: "pointer" }}
-  //                 />
-  //               </td>
-  //             </tr>,
-  //             ...prevContent,
-  //           ]);
-  //         }
-  //       });
-  //       {
-  //         tableContent.slice(Math.ceil(tableContent.length / 2));
-  //       }
-  //       return;
-  //     })
-  //     .finally(() => {
-  //       setLoading(false);
-  //     });
-  // }, []);
+  useEffect(() => {
+    setLoading(true);
+    fetch("https://complaintapi.kodunya.com/api/Complaints", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        data.forEach((data) => {
+          let status;
+          if (data.length === 0) {
+          } else {
+            if (data.status === 0) {
+              status = "Pending";
+            } else if (data.status === 1) {
+              status = "Accepted";
+            } else if (data.status === 2) {
+              status = "Rejected";
+            } else if (data.status === 3) {
+              status = "InProgress";
+            } else if (data.status === 4) {
+              status = "Closed";
+            }
+            setTableContent((prevContent) => [
+              <tr
+                onClick={onClick}
+                id={data.id}
+                className="border-bottom border-1"
+                style={{ cursor: "pointer" }}
+              >
+                <td className="text-break w-25">{data.title}</td>
+                <td>{data.category}</td>
+                <td>{data.createdDate.split("T")[0]}</td>
+                <td className={`text-white bgStatus${data.status} p-2`}>
+                  {status}
+                </td>
+                <td>
+                  <FontAwesomeIcon
+                    icon={faTrashCan}
+                    className="bg-danger p-1  rounded-start rounded-end text-white ms-3"
+                    onClick={onClick}
+                    style={{ cursor: "pointer" }}
+                  />
+                </td>
+              </tr>,
+              ...prevContent,
+            ]);
+          }
+        });
+        {
+          tableContent.slice(Math.ceil(tableContent.length / 2));
+        }
+        return;
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
   const [table, setTable] = useState(<div className="custom-loader"></div>);
   useEffect(() => {
     if (loading === true) {
@@ -283,76 +283,6 @@ function MainPage(props) {
     }
   }, []);
 
-  // Add a <div id="container"> to your HTML to see the component rendered.
-  const [data, setData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
-  useEffect(() => {
-    fetch();
-    fetch(
-      `https://complaintapi.kodunya.com/api/Complaints/Paging?skip=${currentItems}&take=1${itemsPerPage}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "bearer " + token,
-        },
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        data.items.forEach((data) => {
-          let status;
-          if (data.length === 0) {
-          } else {
-            if (data.status === 0) {
-              status = "Pending";
-            } else if (data.status === 1) {
-              status = "Accepted";
-            } else if (data.status === 2) {
-              status = "Rejected";
-            } else if (data.status === 3) {
-              status = "InProgress";
-            } else if (data.status === 4) {
-              status = "Closed";
-            }
-            setTableContent((prevContent) => [
-              <tr
-                onClick={onClick}
-                id={data.id}
-                className="border-bottom border-1"
-                style={{ cursor: "pointer" }}
-              >
-                <td className="text-break w-25">{data.title}</td>
-                <td>{data.category}</td>
-                <td>{data.createdDate.split("T")[0]}</td>
-                <td className={`text-white bgStatus${data.status} p-2`}>
-                  {status}
-                </td>
-                <td>
-                  <FontAwesomeIcon
-                    icon={faTrashCan}
-                    className="bg-danger p-1  rounded-start rounded-end text-white ms-3"
-                    onClick={onClick}
-                    style={{ cursor: "pointer" }}
-                  />
-                </td>
-              </tr>,
-              ...prevContent,
-            ]);
-          }
-        });
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [currentPage, itemsPerPage]);
-
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentItems = data.slice(startIndex, endIndex);
   return (
     <>
       <div className="d-flex flex-column w-100 justify-content-center align-items-center mt-3">
