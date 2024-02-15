@@ -154,7 +154,7 @@ function RegisterPage() {
       formisValid();
     }
   };
-  const handlePhoneNumber = () => {
+  const handlePhoneNumber = (e) => {
     const formisValid = () => {
       input.classList.add("form-control");
       input.classList.remove("is-invalid");
