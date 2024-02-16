@@ -1,106 +1,161 @@
-"use strict";
+// import {
+//   ColumnDirective,
+//   ColumnsDirective,
+//   GridComponent,
+//   Inject,
+//   Page,
+// } from "@syncfusion/ej2-react-grids";
+// import React, { useState } from "react";
+// import { data } from "./datasource";
+// import { TextBoxComponent } from "@syncfusion/ej2-react-inputs";
+// import { ButtonComponent } from "@syncfusion/ej2-react-buttons";
 
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
-// import "ag-grid-enterprise";
-import { AgGridReact } from "ag-grid-react";
-import React, { StrictMode, useCallback, useMemo, useState } from "react";
-import { createRoot } from "react-dom/client";
+// function App() {
+//   const [pageSettings, setPageSettings] = useState();
+//   let textbox;
+//   const click = () => {
+//     const pageSize = { pageSize: textbox.value };
+//     setPageSettings(pageSize);
+//   };
+//   return (
+//     <div>
+//       <label>Enter page size:</label>
+//       <TextBoxComponent
+//         ref={(t) => (textbox = t)}
+//         width={120}
+//       ></TextBoxComponent>
+//       <ButtonComponent onClick={click}>Click button</ButtonComponent>
+//       <GridComponent
+//         dataSource={data}
+//         height={265}
+//         allowPaging={true}
+//         pageSettings={pageSettings}
+//       >
+//         <ColumnsDirective>
+//           <ColumnDirective
+//             field="OrderID"
+//             headerText="Order ID"
+//             width="120"
+//             textAlign="Right"
+//             isPrimaryKey={true}
+//           />
+//           <ColumnDirective
+//             field="CustomerID"
+//             headerText="Customer ID"
+//             width="140"
+//           />
+//           <ColumnDirective
+//             field="Freight"
+//             headerText="Freight"
+//             width="120"
+//             format="C"
+//             textAlign="Right"
+//           />
+//           <ColumnDirective
+//             field="ShipCountry"
+//             headerText="Ship Country"
+//             width="150"
+//           />
+//           <ColumnDirective
+//             field="ShipCity"
+//             headerText="Ship City"
+//             width="150"
+//           />
+//           <ColumnDirective
+//             field="Verified"
+//             headerText="Verified"
+//             width="150"
+//             displayAsCheckBox={true}
+//           />
+//         </ColumnsDirective>
+//         <Inject services={[Page]} />
+//       </GridComponent>
+//     </div>
+//   );
+// }
+// export default App;
 
-var checkboxSelection = function (params) {
-  // we put checkbox on the name if we are not doing grouping
-  return params.api.getRowGroupColumns().length === 0;
-};
+import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
+const token = Cookies.get("cookie");
+export default function App() {
+  const [products, setProducts] = useState([]);
+  const [page, setPage] = useState(1);
 
-var headerCheckboxSelection = function (params) {
-  // we put checkbox on the name if we are not doing grouping
-  return params.api.getRowGroupColumns().length === 0;
-};
-
-const GridExample = () => {
-  const containerStyle = useMemo(() => ({ width: "100%", height: "100%" }), []);
-  const gridStyle = useMemo(() => ({ height: "100%", width: "100%" }), []);
-  const [rowData, setRowData] = useState();
-  const [columnDefs, setColumnDefs] = useState([
-    {
-      field: "athlete",
-      minWidth: 170,
-      checkboxSelection: checkboxSelection,
-      headerCheckboxSelection: headerCheckboxSelection,
-    },
-    { field: "age" },
-    { field: "country" },
-    { field: "year" },
-    { field: "date" },
-    { field: "sport" },
-    { field: "gold" },
-    { field: "silver" },
-    { field: "bronze" },
-    { field: "total" },
-  ]);
-  const autoGroupColumnDef = useMemo(() => {
-    return {
-      headerName: "Group",
-      minWidth: 170,
-      field: "athlete",
-      valueGetter: (params) => {
-        if (params.node.group) {
-          return params.node.key;
-        } else {
-          return params.data[params.colDef.field];
-        }
+  const fetchProducts = async () => {
+    const res = await fetch("https://complaintapi.kodunya.com/api/Complaints", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-      headerCheckboxSelection: true,
-      // headerCheckboxSelectionFilteredOnly: true,
-      cellRenderer: "agGroupCellRenderer",
-      cellRendererParams: {
-        checkbox: true,
-      },
-    };
-  }, []);
-  const defaultColDef = useMemo(() => {
-    return {
-      editable: true,
-      enableRowGroup: true,
-      enablePivot: true,
-      enableValue: true,
-      filter: true,
-      flex: 1,
-      minWidth: 100,
-    };
+    });
+    const data = await res.json();
+    console.log(data);
+    if (data && data.length) setProducts(data);
+  };
+
+  useEffect(() => {
+    fetchProducts();
   }, []);
 
-  const onGridReady = useCallback((params) => {
-    fetch("https://www.ag-grid.com/example-assets/olympic-winners.json")
-      .then((resp) => resp.json())
-      .then((data) => setRowData(data));
-  }, []);
+  // event handler for page change on click
+  const handlePageChange = (pageNumber) => {
+    if (
+      pageNumber > 0 &&
+      pageNumber <= products.length / 10 &&
+      pageNumber !== page
+    )
+      setPage(pageNumber);
+    console.log(pageNumber);
+    console.log(page);
+  };
 
   return (
-    <div style={containerStyle}>
-      <div style={gridStyle} className={"ag-theme-quartz"}>
-        <AgGridReact
-          rowData={rowData}
-          columnDefs={columnDefs}
-          autoGroupColumnDef={autoGroupColumnDef}
-          defaultColDef={defaultColDef}
-          suppressRowClickSelection={true}
-          groupSelectsChildren={true}
-          rowSelection={"multiple"}
-          rowGroupPanelShow={"always"}
-          pivotPanelShow={"always"}
-          paginationAutoPageSize={true}
-          pagination={true}
-          onGridReady={onGridReady}
-        />
-      </div>
+    <div className="App">
+      <h1>All Products</h1>
+      {products.length && (
+        <ol className="All__products">
+          {products.slice(page * 10 - 10, page * 10).map((product) => (
+            <li key={product.id} className="product">
+              <img src={product.thumbnail} alt={product.title} />
+              <h4>{product.title}</h4>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      {products.length > 0 && (
+        <section className="pagination">
+          <span
+            onClick={() => handlePageChange(page - 1)}
+            className={`arrow ${page === 1 ? "pagination__disabled" : ""}`}
+          >
+            ⬅
+          </span>
+          {[...Array(Math.ceil(products.length / 10))].map((_, i) => (
+            <span
+              className={`page__number ${
+                page === i + 1 ? "selected__page__number" : ""
+              }`}
+              key={i + 1}
+              onClick={() => handlePageChange(i + 1)}
+            >
+              {i + 1}
+            </span>
+          ))}
+          <span
+            onClick={() => handlePageChange(page + 1)}
+            className={`arrow ${
+              page === Math.floor(products.length / 10)
+                ? "pagination__disabled"
+                : ""
+            }`}
+          >
+            ➡
+          </span>
+        </section>
+      )}
     </div>
   );
-};
-
-const root = createRoot(document.getElementById("root"));
-root.render(
-  <StrictMode>
-    <GridExample />
-  </StrictMode>
-);
+}

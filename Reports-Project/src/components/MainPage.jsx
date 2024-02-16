@@ -18,6 +18,7 @@ import { PaginationItem, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ReactPaginate from "react-paginate";
+import Paginate from "./Paginate";
 
 function MainPage(props) {
   // description - search in navbar - filter complaints
@@ -142,10 +143,6 @@ function MainPage(props) {
             ]);
           }
         });
-        {
-          tableContent.slice(Math.ceil(tableContent.length / 2));
-        }
-        return;
       })
       .finally(() => {
         setLoading(false);
@@ -299,7 +296,8 @@ function MainPage(props) {
             <th></th>
           </tr>
         </tbody>
-        {tableContent.slice(0, tableContent.length / 2)}
+        {/* {tableContent.slice(0, tableContent.length / 2)} */}
+        {table}
       </table>
       {/* <Modal
         isOpen={isModalOpen}
