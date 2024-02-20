@@ -13,12 +13,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import AddComplaint from "./AddComplaint";
 import "./MainPage.css";
-import Pagination from "@mui/material/Pagination";
-import { PaginationItem, Typography } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ReactPaginate from "react-paginate";
-import Paginate from "./Paginate";
+import { Pagination } from "@mui/material";
 
 function MainPage(props) {
   // description - search in navbar - filter complaints
@@ -148,6 +143,51 @@ function MainPage(props) {
         setLoading(false);
       });
   }, []);
+  const [complaints, setcomplaints] = useState([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(1);
+  const fetchProducts = async (pageNumber) => {
+    console.log("entering");
+    let page_number;
+    if (pageNumber === undefined || pageNumber === null) {
+      page_number = page;
+    } else {
+      page_number = pageNumber;
+    }
+    console.log(page_number);
+    const res = await fetch(
+      `https://complaintapi.kodunya.com/api/Complaints/Paging?skip=${page_number}&take=10`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const data = await res.json();
+    console.log(data);
+    if (data.items && data.items.length)
+      setcomplaints(data.items), setTotal(data.total), setPage(page_number);
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, [page]);
+
+  // event handler for page change on click
+  const handlePageChange = (e, pageNumber) => {
+    console.log(pageNumber);
+    if (
+      pageNumber > 0 &&
+      pageNumber <= complaints.length / 10 &&
+      pageNumber !== page
+    )
+      setPage(pageNumber);
+    console.log(page);
+    fetchProducts(pageNumber);
+  };
+  console.log(page);
   const [table, setTable] = useState(<div className="custom-loader"></div>);
   useEffect(() => {
     if (loading === true) {
@@ -279,7 +319,7 @@ function MainPage(props) {
       );
     }
   }, []);
-
+  console.log(page);
   return (
     <>
       <div className="d-flex flex-column w-100 justify-content-center align-items-center mt-3">
@@ -295,9 +335,49 @@ function MainPage(props) {
             <th>Status</th>
             <th></th>
           </tr>
+
+          {complaints.length && (
+            <>
+              {complaints.slice(page * 10 - 10, page * 10).map((complaint) => (
+                <tr
+                  // onClick={onClick}
+                  id={complaint.id}
+                  className="border-bottom border-1"
+                  style={{ cursor: "pointer" }}
+                >
+                  <td className="text-break w-25">{complaint.title}</td>
+                  <td>{complaint.category}</td>
+                  <td>{complaint.createdDate.split("T")[0]}</td>
+                  <td className={`text-white bgStatus${complaint.status} p-2`}>
+                    {complaint.status}
+                  </td>
+                  <td>
+                    <FontAwesomeIcon
+                      icon={faTrashCan}
+                      className="bg-danger p-1  rounded-start rounded-end text-white ms-3"
+                      // onClick={onClick}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </>
+          )}
+
+          {complaints.length > 0 && (
+            <section className="pagination">
+              <Pagination
+                count={Math.ceil(total / 10)}
+                variant="outlined"
+                page={page}
+                onChange={handlePageChange}
+                // onPageChange={handlePageChange(page + 1)}
+              />
+            </section>
+          )}
         </tbody>
+        {/* {table} */}
         {/* {tableContent.slice(0, tableContent.length / 2)} */}
-        {table}
       </table>
       {/* <Modal
         isOpen={isModalOpen}

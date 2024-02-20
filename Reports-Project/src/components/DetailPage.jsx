@@ -366,6 +366,7 @@ function DetailPage() {
             </div>
           </div>,
         ]);
+        console.log(data);
         data.messages.forEach((message) => {
           let sender;
           if (message.userId === getuserId) {

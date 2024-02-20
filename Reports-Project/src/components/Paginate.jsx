@@ -1,98 +1,36 @@
-// import {
-//   ColumnDirective,
-//   ColumnsDirective,
-//   GridComponent,
-//   Inject,
-//   Page,
-// } from "@syncfusion/ej2-react-grids";
-// import React, { useState } from "react";
-// import { data } from "./datasource";
-// import { TextBoxComponent } from "@syncfusion/ej2-react-inputs";
-// import { ButtonComponent } from "@syncfusion/ej2-react-buttons";
-
-// function App() {
-//   const [pageSettings, setPageSettings] = useState();
-//   let textbox;
-//   const click = () => {
-//     const pageSize = { pageSize: textbox.value };
-//     setPageSettings(pageSize);
-//   };
-//   return (
-//     <div>
-//       <label>Enter page size:</label>
-//       <TextBoxComponent
-//         ref={(t) => (textbox = t)}
-//         width={120}
-//       ></TextBoxComponent>
-//       <ButtonComponent onClick={click}>Click button</ButtonComponent>
-//       <GridComponent
-//         dataSource={data}
-//         height={265}
-//         allowPaging={true}
-//         pageSettings={pageSettings}
-//       >
-//         <ColumnsDirective>
-//           <ColumnDirective
-//             field="OrderID"
-//             headerText="Order ID"
-//             width="120"
-//             textAlign="Right"
-//             isPrimaryKey={true}
-//           />
-//           <ColumnDirective
-//             field="CustomerID"
-//             headerText="Customer ID"
-//             width="140"
-//           />
-//           <ColumnDirective
-//             field="Freight"
-//             headerText="Freight"
-//             width="120"
-//             format="C"
-//             textAlign="Right"
-//           />
-//           <ColumnDirective
-//             field="ShipCountry"
-//             headerText="Ship Country"
-//             width="150"
-//           />
-//           <ColumnDirective
-//             field="ShipCity"
-//             headerText="Ship City"
-//             width="150"
-//           />
-//           <ColumnDirective
-//             field="Verified"
-//             headerText="Verified"
-//             width="150"
-//             displayAsCheckBox={true}
-//           />
-//         </ColumnsDirective>
-//         <Inject services={[Page]} />
-//       </GridComponent>
-//     </div>
-//   );
-// }
-// export default App;
-
-import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-const token = Cookies.get("cookie");
+import { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { Pagination } from "@mui/material";
 export default function App() {
-  const [products, setProducts] = useState([]);
+  const [complaints, setcomplaints] = useState([]);
   const [page, setPage] = useState(1);
-
-  const fetchProducts = async () => {
-    const res = await fetch("https://complaintapi.kodunya.com/api/Complaints", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  const [total, setTotal] = useState(1);
+  const token = Cookies.get("cookie");
+  const fetchProducts = async (pageNumber) => {
+    console.log("entering");
+    let page_number;
+    if (pageNumber === undefined || pageNumber === null) {
+      page_number = page;
+    } else {
+      page_number = pageNumber;
+    }
+    console.log(page_number);
+    const res = await fetch(
+      `https://complaintapi.kodunya.com/api/Complaints/Paging?skip=${page_number}&take=10`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     const data = await res.json();
     console.log(data);
-    if (data && data.length) setProducts(data);
+    if (data.items && data.items.length)
+      setcomplaints(data.items), setTotal(data.total);
   };
 
   useEffect(() => {
@@ -101,31 +39,51 @@ export default function App() {
 
   // event handler for page change on click
   const handlePageChange = (pageNumber) => {
+    console.log(pageNumber);
     if (
       pageNumber > 0 &&
-      pageNumber <= products.length / 10 &&
+      pageNumber <= complaints.length / 10 &&
       pageNumber !== page
     )
       setPage(pageNumber);
-    console.log(pageNumber);
-    console.log(page);
+    fetchProducts(pageNumber);
   };
-
+  console.log(page);
   return (
     <div className="App">
       <h1>All Products</h1>
-      {products.length && (
-        <ol className="All__products">
-          {products.slice(page * 10 - 10, page * 10).map((product) => (
-            <li key={product.id} className="product">
-              <img src={product.thumbnail} alt={product.title} />
-              <h4>{product.title}</h4>
-            </li>
-          ))}
-        </ol>
+
+      {complaints.length && (
+        <table>
+          <tbody>
+            {complaints.slice(page * 10 - 10, page * 10).map((complaint) => (
+              <tr
+                // onClick={onClick}
+                id={complaint.id}
+                className="border-bottom border-1"
+                style={{ cursor: "pointer" }}
+              >
+                <td className="text-break w-25">{complaint.title}</td>
+                <td>{complaint.category}</td>
+                <td>{complaint.createdDate.split("T")[0]}</td>
+                <td className={`text-white bgStatus${complaint.status} p-2`}>
+                  {status}
+                </td>
+                <td>
+                  <FontAwesomeIcon
+                    icon={faTrashCan}
+                    className="bg-danger p-1  rounded-start rounded-end text-white ms-3"
+                    // onClick={onClick}
+                    style={{ cursor: "pointer" }}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
 
-      {products.length > 0 && (
+      {complaints.length > 0 && (
         <section className="pagination">
           <span
             onClick={() => handlePageChange(page - 1)}
@@ -133,7 +91,7 @@ export default function App() {
           >
             ⬅
           </span>
-          {[...Array(Math.ceil(products.length / 10))].map((_, i) => (
+          {[...Array(Math.ceil(total / 10))].map((_, i) => (
             <span
               className={`page__number ${
                 page === i + 1 ? "selected__page__number" : ""
@@ -147,13 +105,14 @@ export default function App() {
           <span
             onClick={() => handlePageChange(page + 1)}
             className={`arrow ${
-              page === Math.floor(products.length / 10)
+              page === Math.floor(complaints.length / 10)
                 ? "pagination__disabled"
                 : ""
             }`}
           >
             ➡
           </span>
+          <Pagination count={Math.ceil(total / 10)} variant="outlined" />
         </section>
       )}
     </div>
