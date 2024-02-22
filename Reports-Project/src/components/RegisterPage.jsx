@@ -51,7 +51,6 @@ function RegisterPage() {
             }
           })
           .then((data) => {
-            console.log(data);
             if (data.token) {
               const Toast = Swal.mixin({
                 toast: true,

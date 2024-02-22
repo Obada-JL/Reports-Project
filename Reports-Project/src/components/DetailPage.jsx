@@ -114,13 +114,9 @@ function DetailPage() {
         let isUserStaff = "";
 
         if (isStaff === "true") {
-          console.log(isStaff);
           if (status === "Accepted") {
-            console.log(canClose);
             if (canInProgress == "true") {
-              console.log("hhhhhhhhh");
               if (canClose === "true") {
-                console.log("sssssssssss");
                 isUserStaff = (
                   <div className="d-flex gap-2">
                     <button
@@ -162,7 +158,6 @@ function DetailPage() {
               );
             }
             if (canClose === "true") {
-              console.log("closed");
               if (canInProgress === "true") {
                 isUserStaff = (
                   <div className="d-flex gap-2">
@@ -194,7 +189,6 @@ function DetailPage() {
                 );
               }
             } else {
-              console.log("else");
               isUserStaff = (
                 <button
                   className="btn btn-info"
@@ -206,7 +200,6 @@ function DetailPage() {
               );
             }
           } else {
-            console.log("GGGgggggg");
             if (canAccept === "true") {
               if (canReject === "true") {
                 isUserStaff = (
@@ -271,7 +264,6 @@ function DetailPage() {
                   </div>
                 );
               } else {
-                console.log("reject1");
                 isUserStaff = (
                   <button
                     className="btn btn-danger"
@@ -283,7 +275,6 @@ function DetailPage() {
                 );
               }
             } else {
-              console.log("reject2");
               isUserStaff = (
                 <button
                   className="btn btn-danger"
@@ -366,7 +357,7 @@ function DetailPage() {
             </div>
           </div>,
         ]);
-        console.log(data);
+
         data.messages.forEach((message) => {
           let sender;
           if (message.userId === getuserId) {
@@ -408,7 +399,6 @@ function DetailPage() {
   );
   const messageInput = useRef();
   const onMessageSend = (event) => {
-    console.log("message Sent");
     const values = {
       complaintId: id,
       message: messageInput.current.value,

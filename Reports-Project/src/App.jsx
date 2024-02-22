@@ -9,7 +9,7 @@ import DetailPage from "./components/DetailPage";
 import PageLayout from "./components/PageLayout";
 import { AuthProvider } from "./AppContext";
 import AdminDetails from "./components/AdminDetails";
-import YourComponent from "./components/Paginate";
+import YourComponent from "./components/Sorting";
 const router = createBrowserRouter([
   {
     path: "/",

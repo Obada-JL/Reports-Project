@@ -21,8 +21,6 @@ function AddAdmin(props) {
   const onAddAdmin = (e) => {
     e.preventDefault();
     let premissions = [];
-    console.log(canReject.current.classList.contains("selected"));
-    console.log(canReject.current.classList);
     if (canAccept.current.classList.contains("selected")) {
       premissions.push(true);
     } else {
@@ -65,10 +63,8 @@ function AddAdmin(props) {
   const AddSelectedClass = (e) => {
     if (e.target.classList.contains("selected")) {
       e.target.classList.remove("selected");
-      console.log(e.target);
     } else {
       e.target.classList.add("selected");
-      console.log(e.target);
     }
   };
   return (

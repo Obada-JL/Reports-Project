@@ -60,7 +60,7 @@ function AdminPage() {
       canClose: record.canClose,
       manageAdmins: record.manageAdmins,
     };
-    console.log(Values);
+
     fetch("https://complaintapi.kodunya.com/api/Users", {
       method: "POST",
       headers: {
@@ -70,16 +70,13 @@ function AdminPage() {
       body: JSON.stringify(Values),
     })
       .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-      })
+      .then((data) => {})
       .catch((error) => {
         console.error("Error during the fetch operation:", error);
       });
     handleCloseModal();
   };
   const DeleteAdmins = (data) => {
-    console.log(data.currentTarget.closest("tr").id);
     const adminId = data.currentTarget.closest("tr").id;
     fetch(`https://complaintapi.kodunya.com/api/Users/${adminId}`, {
       method: "DELETE",
@@ -100,7 +97,6 @@ function AdminPage() {
           confirmButtonText: "Yes, delete it!",
         }).then((result) => {
           if (result.isConfirmed) {
-            console.log(data);
             Swal.fire({
               title: "Deleted!",
               text: "Your file has been deleted.",
@@ -124,9 +120,7 @@ function AdminPage() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         data.forEach((admin) => {
-          console.log(admin);
           let premissionsArray = [];
           if (admin.canAccept) {
             premissionsArray.push("Accept" + " , ");
@@ -199,9 +193,6 @@ function AdminPage() {
       setTable(tableContent.slice(0, Math.ceil(tableContent.length) / 2));
     }
   }, [loading, tableContent]);
-  const EditAdmin = (props) => {
-    console.log(props);
-  };
 
   return (
     <>
@@ -244,11 +235,7 @@ function AdminPage() {
         contentLabel="Modal"
         style={modalStyles}
       >
-        <AdminDetails
-          onCancel={handleCloseModal}
-          onSubmit={EditAdmin}
-          data={AdminData}
-        />
+        <AdminDetails onCancel={handleCloseModal} data={AdminData} />
       </Modal>
     </>
   );

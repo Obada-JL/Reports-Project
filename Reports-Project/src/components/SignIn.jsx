@@ -109,7 +109,6 @@ function SignIn() {
             }
           })
           .then((data) => {
-            console.log(data);
             if (data.token) {
               setCookie("isStaff", data.isStaff);
               setCookie("canAccept", data.canAccept);

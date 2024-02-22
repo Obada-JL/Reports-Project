@@ -6,7 +6,6 @@ export const AuthProvider = ({ children }) => {
   const [adminId, setadminId] = useState();
 
   const setAdmin = (admin) => {
-    console.log(admin);
     setadminId(admin);
   };
 

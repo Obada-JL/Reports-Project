@@ -4,6 +4,10 @@ import {
   faCodeCommit,
   faPenToSquare,
   faTrashCan,
+  faArrowDownAZ,
+  faSort,
+  faSortDown,
+  faSortUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
@@ -14,6 +18,7 @@ import Cookies from "js-cookie";
 import AddComplaint from "./AddComplaint";
 import "./MainPage.css";
 import { Pagination } from "@mui/material";
+import Sorting from "./Sorting";
 
 function MainPage(props) {
   // description - search in navbar - filter complaints
@@ -36,7 +41,6 @@ function MainPage(props) {
   };
   const [tableContent, setTableContent] = useState([]);
   const formSubmitHandler = (record) => {
-    console.log(record.id);
     setTableContent((prevContent) => [
       <tr onClick={handleOpenModal}>
         <td>{record.title}</td>
@@ -60,7 +64,7 @@ function MainPage(props) {
       title: record.title,
       image: record.image,
     };
-    console.log(Values);
+
     fetch("https://complaintapi.kodunya.com/api/Complaints", {
       method: "POST",
       headers: {
@@ -80,83 +84,30 @@ function MainPage(props) {
     if (e.target.tagName === "TD") {
       OpenDetailPage(e);
     } else {
-      console.log(e.target.tagName);
       DeleteComplaint(e);
     }
   };
   const token = Cookies.get("cookie");
   const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    setLoading(true);
-    fetch("https://complaintapi.kodunya.com/api/Complaints", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        data.forEach((data) => {
-          let status;
-          if (data.length === 0) {
-          } else {
-            if (data.status === 0) {
-              status = "Pending";
-            } else if (data.status === 1) {
-              status = "Accepted";
-            } else if (data.status === 2) {
-              status = "Rejected";
-            } else if (data.status === 3) {
-              status = "InProgress";
-            } else if (data.status === 4) {
-              status = "Closed";
-            }
-            setTableContent((prevContent) => [
-              <tr
-                onClick={onClick}
-                id={data.id}
-                className="border-bottom border-1"
-                style={{ cursor: "pointer" }}
-              >
-                <td className="text-break w-25">{data.title}</td>
-                <td>{data.category}</td>
-                <td>{data.createdDate.split("T")[0]}</td>
-                <td className={`text-white bgStatus${data.status} p-2`}>
-                  {status}
-                </td>
-                <td>
-                  <FontAwesomeIcon
-                    icon={faTrashCan}
-                    className="bg-danger p-1  rounded-start rounded-end text-white ms-3"
-                    onClick={onClick}
-                    style={{ cursor: "pointer" }}
-                  />
-                </td>
-              </tr>,
-              ...prevContent,
-            ]);
-          }
-        });
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
   const [complaints, setcomplaints] = useState([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(1);
-  const fetchProducts = async (pageNumber) => {
-    console.log("entering");
+  const fetchProducts = async (pageNumber, category, type) => {
     let page_number;
+    setLoading(true);
     if (pageNumber === undefined || pageNumber === null) {
       page_number = page;
     } else {
       page_number = pageNumber;
     }
-    console.log(page_number);
     const res = await fetch(
-      `https://complaintapi.kodunya.com/api/Complaints/Paging?skip=${page_number}&take=10`,
+      `https://complaintapi.kodunya.com/api/Complaints/Paging?skip=${page_number}&take=10${
+        category === undefined
+          ? ""
+          : type !== undefined || type !== ""
+          ? `&SortField=${category}&SortType=${type}`
+          : ""
+      }`,
       {
         method: "GET",
         headers: {
@@ -166,28 +117,27 @@ function MainPage(props) {
       }
     );
     const data = await res.json();
-    console.log(data);
+
     if (data.items && data.items.length)
       setcomplaints(data.items), setTotal(data.total), setPage(page_number);
+    setLoading(false);
   };
-
   useEffect(() => {
     fetchProducts();
   }, [page]);
 
   // event handler for page change on click
   const handlePageChange = (e, pageNumber) => {
-    console.log(pageNumber);
     if (
       pageNumber > 0 &&
       pageNumber <= complaints.length / 10 &&
       pageNumber !== page
     )
       setPage(pageNumber);
-    console.log(page);
+
     fetchProducts(pageNumber);
   };
-  console.log(page);
+
   const [table, setTable] = useState(<div className="custom-loader"></div>);
   useEffect(() => {
     if (loading === true) {
@@ -210,7 +160,6 @@ function MainPage(props) {
     setIsOpenModal(false);
   };
   const DeleteComplaint = (e) => {
-    console.log(e.currentTarget.closest("tr").id);
     const trId = e.currentTarget.closest("tr").id;
     Swal.fire({
       title: "Are you sure to Delete This Complaint ?",
@@ -220,7 +169,6 @@ function MainPage(props) {
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, Delete",
     }).then((result) => {
-      console.log(result.isConfirmed);
       if (result.isConfirmed) {
         Swal.fire({
           title: "Deleted successfuly!",
@@ -231,7 +179,6 @@ function MainPage(props) {
           headers: {
             "Content-Type": "application/json",
             Authorization: "bearer " + token,
-            // Add any other headers if needed
           },
         }).then((response) => {
           response.json();
@@ -319,28 +266,70 @@ function MainPage(props) {
       );
     }
   }, []);
-  console.log(page);
+  const [sortType, setSortType] = useState(
+    <FontAwesomeIcon icon={faSort} className="ms-1 " />
+  );
+  const sort = (e, category) => {
+    const svgElement = e.target.children[0].closest("svg");
+    console.log(svgElement);
+
+    if (svgElement.classList.contains("fa-sort")) {
+      console.log(sortType);
+      setSortType(<FontAwesomeIcon icon={faSortDown} className="ms-1 " />);
+      fetchProducts(page, category, "AZ");
+    } else if (svgElement.classList.contains("fa-sort-down")) {
+      console.log("eee");
+      setSortType(<FontAwesomeIcon icon={faSortUp} className="ms-1 " />);
+      fetchProducts(page, category, "ZA");
+    } else {
+      console.log(e.target.children);
+      setSortType(<FontAwesomeIcon icon={faSort} className="ms-1 " />);
+      fetchProducts(page, category, "");
+    }
+  };
   return (
     <>
       <div className="d-flex flex-column w-100 justify-content-center align-items-center mt-3">
         <h1>{mainTitle}</h1>
       </div>
       {head}
+      {complaints.length > 0 && (
+        <section className="pagination">
+          <Pagination
+            count={Math.ceil(total / 10)}
+            variant="outlined"
+            page={page}
+            onChange={handlePageChange}
+          />
+        </section>
+      )}
       <table className="table table-hover table-striped mt-5 ">
         <tbody ref={tableBody}>
-          <tr className="border-0 border-bottom border-3 border-dark">
-            <th>Title</th>
-            <th>Category</th>
-            <th>Date</th>
-            <th>Status</th>
+          <tr className="border-0 border-bottom border-3 border-dark d-table-row">
+            <th onClick={(e) => sort(e, "Title", "")}>
+              Title
+              {sortType}
+            </th>
+            <th onClick={(e) => sort(e, "Category", "")}>
+              Category
+              {sortType}
+            </th>
+            <th onClick={(e) => sort(e, "createdDate", "")}>
+              Date
+              {sortType}
+            </th>
+            <th onClick={(e) => sort(e, "Status", "")}>
+              Status
+              {sortType}
+            </th>
             <th></th>
           </tr>
-
-          {complaints.length && (
+          {
             <>
-              {complaints.slice(page * 10 - 10, page * 10).map((complaint) => (
+              {complaints.slice(0, 10).map((complaint) => (
                 <tr
-                  // onClick={onClick}
+                  key={complaint.id}
+                  onClick={onClick}
                   id={complaint.id}
                   className="border-bottom border-1"
                   style={{ cursor: "pointer" }}
@@ -349,44 +338,32 @@ function MainPage(props) {
                   <td>{complaint.category}</td>
                   <td>{complaint.createdDate.split("T")[0]}</td>
                   <td className={`text-white bgStatus${complaint.status} p-2`}>
-                    {complaint.status}
+                    {complaint.status === 0
+                      ? "Pending"
+                      : complaint.status === 1
+                      ? "Accepted"
+                      : complaint.status === 2
+                      ? "Rejected"
+                      : complaint.status === 3
+                      ? "In Progress"
+                      : complaint.status === 4
+                      ? "Closed"
+                      : ""}
                   </td>
                   <td>
                     <FontAwesomeIcon
                       icon={faTrashCan}
-                      className="bg-danger p-1  rounded-start rounded-end text-white ms-3"
-                      // onClick={onClick}
+                      className="bg-danger p-1 rounded-start rounded-end text-white ms-3"
+                      onClick={onClick}
                       style={{ cursor: "pointer" }}
                     />
                   </td>
                 </tr>
               ))}
             </>
-          )}
-
-          {complaints.length > 0 && (
-            <section className="pagination">
-              <Pagination
-                count={Math.ceil(total / 10)}
-                variant="outlined"
-                page={page}
-                onChange={handlePageChange}
-                // onPageChange={handlePageChange(page + 1)}
-              />
-            </section>
-          )}
+          }
         </tbody>
-        {/* {table} */}
-        {/* {tableContent.slice(0, tableContent.length / 2)} */}
       </table>
-      {/* <Modal
-        isOpen={isModalOpen}
-        onRequestClose={handleCloseModal}
-        contentLabel="Modal"
-        style={modalStyles}
-      >
-
-      </Modal> */}
       <Modal
         isOpen={isOpenModal}
         onRequestClose={handleCloseModal}
@@ -398,9 +375,6 @@ function MainPage(props) {
           onFormSubmit={formSubmitHandler}
         />
       </Modal>
-      <div className="d-flex justify-content-center mt-3 pb-5">
-        {/* <Typography>Page: {page}</Typography> */}
-      </div>
     </>
   );
 }

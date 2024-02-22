@@ -78,10 +78,8 @@ function AdminDetails(props) {
   const AddSelectedClass = (e) => {
     if (e.target.classList.contains("selected")) {
       e.target.classList.remove("selected");
-      console.log(e.target);
     } else {
       e.target.classList.add("selected");
-      console.log(e.target);
     }
   };
   const name = useRef();
@@ -133,7 +131,7 @@ function AdminDetails(props) {
       manageAdmins: premissions[4],
       password: "",
     };
-    console.log(Values);
+
     fetch(`https://complaintapi.kodunya.com/api/Users/${props.data.id}`, {
       method: "PUT",
       headers: {
@@ -146,7 +144,6 @@ function AdminDetails(props) {
         return response.json();
       })
       .then((data) => {
-        console.log(data);
         if (data === true) {
           props.onCancel();
           window.location.reload(true);
