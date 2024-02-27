@@ -266,24 +266,48 @@ function MainPage(props) {
       );
     }
   }, []);
-  const [sortType, setSortType] = useState(
+  const [sortTypeTitle, setSortTypeTitle] = useState(
     <FontAwesomeIcon icon={faSort} className="ms-1 " />
   );
+  const [sortTypeCategory, setSortTypeCategory] = useState(
+    <FontAwesomeIcon icon={faSort} className="ms-1 " />
+  );
+  const [sortTypeDate, setSortTypeDate] = useState(
+    <FontAwesomeIcon icon={faSort} className="ms-1 " />
+  );
+  const [sortTypeStatus, setSortTypeStatus] = useState(
+    <FontAwesomeIcon icon={faSort} className="ms-1 " />
+  );
+  const sorting = (props, icon) => {
+    if (props === "Title") {
+      setSortTypeTitle(<FontAwesomeIcon icon={icon} className="ms-1 down" />);
+    } else if (props === "Category") {
+      setSortTypeCategory(
+        <FontAwesomeIcon icon={icon} className="ms-1 down" />
+      );
+    } else if (props === "Date") {
+      setSortTypeDate(<FontAwesomeIcon icon={icon} className="ms-1 down" />);
+    } else if (props === "Status") {
+      setSortTypeStatus(<FontAwesomeIcon icon={icon} className="ms-1 down" />);
+    } else {
+    }
+  };
   const sort = (e, category) => {
     const svgElement = e.target.children[0].closest("svg");
-    console.log(svgElement);
+    const HeaderTDs = e.target.closest("tr").children;
+    for (let i = 0; i < HeaderTDs.length; i++) {
+      console.log(HeaderTDs[i].innerText);
+      sorting(HeaderTDs[i].innerText, faSort);
+    }
 
     if (svgElement.classList.contains("fa-sort")) {
-      console.log(sortType);
-      setSortType(<FontAwesomeIcon icon={faSortDown} className="ms-1 " />);
+      sorting(category, faSortDown);
       fetchProducts(page, category, "AZ");
     } else if (svgElement.classList.contains("fa-sort-down")) {
-      console.log("eee");
-      setSortType(<FontAwesomeIcon icon={faSortUp} className="ms-1 " />);
+      sorting(category, faSortUp);
       fetchProducts(page, category, "ZA");
     } else {
-      console.log(e.target.children);
-      setSortType(<FontAwesomeIcon icon={faSort} className="ms-1 " />);
+      sorting(category, faSort);
       fetchProducts(page, category, "");
     }
   };
@@ -293,34 +317,24 @@ function MainPage(props) {
         <h1>{mainTitle}</h1>
       </div>
       {head}
-      {complaints.length > 0 && (
-        <section className="pagination">
-          <Pagination
-            count={Math.ceil(total / 10)}
-            variant="outlined"
-            page={page}
-            onChange={handlePageChange}
-          />
-        </section>
-      )}
-      <table className="table table-hover table-striped mt-5 ">
+      <table className="table table-hover table-striped mt-3">
         <tbody ref={tableBody}>
           <tr className="border-0 border-bottom border-3 border-dark d-table-row">
             <th onClick={(e) => sort(e, "Title", "")}>
               Title
-              {sortType}
+              {sortTypeTitle}
             </th>
             <th onClick={(e) => sort(e, "Category", "")}>
               Category
-              {sortType}
+              {sortTypeCategory}
             </th>
             <th onClick={(e) => sort(e, "createdDate", "")}>
               Date
-              {sortType}
+              {sortTypeDate}
             </th>
             <th onClick={(e) => sort(e, "Status", "")}>
               Status
-              {sortType}
+              {sortTypeStatus}
             </th>
             <th></th>
           </tr>
@@ -364,6 +378,24 @@ function MainPage(props) {
           }
         </tbody>
       </table>
+      {complaints.length > 0 && (
+        <section
+          className="pagination w-100 p-2 justify-content-center bg-white border-top border-dark"
+          style={{
+            position: "fixed",
+            marginTop: "-50px",
+            bottom: "0",
+            left: "0",
+          }}
+        >
+          <Pagination
+            count={Math.ceil(total / 10)}
+            variant="outlined"
+            page={page}
+            onChange={handlePageChange}
+          />
+        </section>
+      )}
       <Modal
         isOpen={isOpenModal}
         onRequestClose={handleCloseModal}
