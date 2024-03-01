@@ -5,6 +5,7 @@ export default defineConfig({
   server: {
     port: 3700, // Change this to your desired port number
   },
+  base: "/",
   plugins: [react()],
 });
 // const path = require("path");
