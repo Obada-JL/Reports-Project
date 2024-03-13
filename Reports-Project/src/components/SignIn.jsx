@@ -65,7 +65,7 @@ function SignIn() {
     };
     let formChildrens = signInForm.current.children[0].children;
     for (let i = 0; i < formChildrens.length; i++) {
-      if (formChildrens[i].classList.contains("is-valid") === false) {
+      if (formChildrens[i].classList.contains("is-valid") == false) {
         Swal.fire({
           icon: "error",
           title: "Oops...",
