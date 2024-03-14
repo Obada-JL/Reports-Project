@@ -1,11 +1,10 @@
 import "./signIn.css";
 import Logo from "../assets/logo.jpg";
 import { Link, useNavigate } from "react-router-dom";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useCookies } from "react-cookie";
-import { useAuth } from "../AppContext.jsx";
 function SignIn() {
-  const [cookies, setCookie, removeCookie] = useCookies([
+  const [cookies, setCookie] = useCookies([
     "cookie",
     "isStaff",
     "canAccept",
@@ -19,11 +18,13 @@ function SignIn() {
       input.classList.add("form-control");
       input.classList.remove("is-invalid");
       input.classList.add("is-valid");
+      console.log(input.classList);
     };
     const formisinValid = () => {
       input.classList.add("form-control");
       input.classList.remove("is-valid");
       input.classList.add("is-invalid");
+      console.log(input.classList);
     };
     const input = e.target;
     if (input.value.length === 0 || input.value.includes("@") === false) {
@@ -34,11 +35,13 @@ function SignIn() {
   };
   const handleBlurPassword = (e) => {
     const formisValid = () => {
+      console.log(input.classList);
       input.classList.add("form-control");
       input.classList.remove("is-invalid");
       input.classList.add("is-valid");
     };
     const formisinValid = () => {
+      console.log(input.classList);
       input.classList.add("form-control");
       input.classList.remove("is-valid");
       input.classList.add("is-invalid");
@@ -58,20 +61,16 @@ function SignIn() {
   const password = useRef();
   const navigate = useNavigate();
   const signInForm = useRef();
+  const loader = useRef();
   const onLogin = () => {
     const Values = {
       userName: Email.current.value,
       password: password.current.value,
     };
-    let formChildrens = signInForm.current.children[0].children;
-    for (let i = 0; i < formChildrens.length; i++) {
-      if (formChildrens[i].classList.contains("is-valid") === false) {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "You have some errors!",
-        });
-      } else {
+    let form = signInForm.current;
+    for (let i = 0; i < form.children[1].children.length; i++) {
+      if (form.children[i].children[1].classList.contains("is-valid") == true) {
+        loader.current.style.display = "grid";
         fetch("https://complaintapi.kodunya.com/api/Users/login", {
           method: "POST",
           headers: {
@@ -97,6 +96,7 @@ function SignIn() {
                 icon: "success",
                 title: "Signed in successfully",
               });
+              loader.current.style.display = "none";
               return response.json();
             } else if (response.status === 401) {
               return Swal.fire({
@@ -124,11 +124,22 @@ function SignIn() {
           .catch((error) => {
             console.error("Error during the fetch operation:", error);
           });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "You have some errors!",
+        });
       }
     }
   };
   return (
     <>
+      <div
+        className="custom-loader"
+        ref={loader}
+        style={{ display: "none" }}
+      ></div>
       <div className="sidenav bg-dark">
         <div className="login-main-text">
           <h2>
@@ -150,7 +161,7 @@ function SignIn() {
                   className="form-control"
                   id="validationDefault01"
                   placeholder="Please Enter Your Email"
-                  onBlur={handleBlurEmail}
+                  onChange={handleBlurEmail}
                   ref={Email}
                   required
                 />
@@ -165,7 +176,7 @@ function SignIn() {
                   className="form-control"
                   aria-describedby="passwordHelpBlock"
                   placeholder="Please Enter Your Password"
-                  onBlur={handleBlurPassword}
+                  onChange={handleBlurPassword}
                   ref={password}
                   required
                 />

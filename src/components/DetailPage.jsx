@@ -370,7 +370,7 @@ function DetailPage() {
             );
           } else {
             sender = (
-              <div className="message friend_msg  text-white w-25 text-left">
+              <div className="message friend_msg text-white w-25 text-left">
                 <p
                   className="bg-secondary text-break w-25"
                   style={{ width: "50vw", textWrap: "wrap", textAlign: "left" }}
