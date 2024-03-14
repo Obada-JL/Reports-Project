@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 import "./AddComplaint.css";
 import Cookies from "js-cookie";
 function AddComplaint(props) {
