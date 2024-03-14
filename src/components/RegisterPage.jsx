@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
 function RegisterPage() {
-  const [cookies, setCookie, removeCookie] = useCookies(["cookie"]);
+  const [cookies, setCookie, removeCookies] = useCookies(["cookie"]);
   const password = useRef();
   const userName = useRef();
   const phoneNumber = useRef();
@@ -13,6 +13,7 @@ function RegisterPage() {
   const TC = useRef();
   const navigate = useNavigate();
   const registerForm = useRef();
+  const loader = useRef();
   const onRegister = () => {
     const Values = {
       name: userName.current.value,
@@ -21,60 +22,66 @@ function RegisterPage() {
       tc: TC.current.value,
       email: email.current.value,
     };
-    let formChildrens = registerForm.current.children[0].children;
-    for (let i = 0; i < formChildrens.length; i++) {
-      if (formChildrens[i].classList.contains("is-valid") === false) {
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "You have some errors!",
-        });
-      } else {
-        fetch("https://complaintapi.kodunya.com/api/Users/SignUp", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(Values),
+    if (
+      userName.current.classList.contains("is-valid") == true &&
+      password.current.classList.contains("is-valid") == true &&
+      phoneNumber.current.classList.contains("is-valid") == true &&
+      email.current.classList.contains("is-valid") == true &&
+      TC.current.classList.contains("is-valid") == true
+    ) {
+      loader.current.style.display = "grid";
+      fetch("https://complaintapi.kodunya.com/api/Users/SignUp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(Values),
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            console.log(response);
+            return response.json();
+          } else if (response.status === 401) {
+            return Swal.fire({
+              title: "The user is not defined",
+              text: "Check your Username and password",
+              icon: "error",
+            });
+          } else {
+            alert("error " + response.status);
+          }
         })
-          .then((response) => {
-            if (response.status === 200) {
-              return response.json();
-            } else if (response.status === 401) {
-              return Swal.fire({
-                title: "The user is not defined",
-                text: "Check your Username and password",
-                icon: "error",
-              });
-            } else {
-              alert("error " + response.status);
-            }
-          })
-          .then((data) => {
-            if (data.token) {
-              const Toast = Swal.mixin({
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                  toast.onmouseenter = Swal.stopTimer;
-                  toast.onmouseleave = Swal.resumeTimer;
-                },
-              });
-              Toast.fire({
-                icon: "success",
-                title: "Signed up successfully",
-              });
-              setCookie("cookie", data.token);
-              navigate("/");
-            }
-          })
-          .catch((error) => {
-            console.error("Error during the fetch operation:", error);
-          });
-      }
+        .then((data) => {
+          loader.current.style.display = "none";
+          if (data.token) {
+            const Toast = Swal.mixin({
+              toast: true,
+              position: "top-end",
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+              },
+            });
+            Toast.fire({
+              icon: "success",
+              title: "Signed up successfully",
+            });
+            setCookie("cookie", data.token);
+            navigate("/");
+          }
+        })
+        .catch((error) => {
+          console.error("Error during the fetch operation:", error);
+        });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "You have some errors!",
+      });
     }
   };
   const handleBlurPassword = (e) => {
@@ -173,6 +180,11 @@ function RegisterPage() {
   };
   return (
     <>
+      <div
+        className="custom-loader"
+        ref={loader}
+        style={{ display: "none" }}
+      ></div>
       <div className="sidenav bg-dark">
         <div className="login-main-text">
           <h2>
@@ -188,44 +200,52 @@ function RegisterPage() {
           <div className="mt-lg-3">
             <form ref={registerForm}>
               <div className="form-group">
-                <label>TC Number</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  placeholder="Please Enter Your TC Number"
-                  ref={TC}
-                  onBlur={handleBlurTC}
-                  required
-                />
-                <label>User Name</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Please Enter Your Username"
-                  ref={userName}
-                  onBlur={userNameBlur}
-                  required
-                />
-                <label>Email Adress</label>
-                <input
-                  type="email"
-                  className="form-control"
-                  placeholder="Please Enter Your Email Address"
-                  ref={email}
-                  onBlur={handleBlurEmail}
-                  required
-                />
-                <label className="mt-2">Phone Number</label>
-                <input
-                  type="tel"
-                  className="form-control "
-                  id="validationDefault01"
-                  placeholder="Ex: 539-982-55-77"
-                  ref={phoneNumber}
-                  pattern="[0-9]{3}-[0-9]{3}-[0-9]{2}-[0-9]{2}"
-                  onBlur={handlePhoneNumber}
-                  required
-                />
+                <div>
+                  <label>TC Number</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    placeholder="Please Enter Your TC Number"
+                    ref={TC}
+                    onChange={handleBlurTC}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>User Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Please Enter Your Username"
+                    ref={userName}
+                    onChange={userNameBlur}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Email Adress</label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    placeholder="Please Enter Your Email Address"
+                    ref={email}
+                    onChange={handleBlurEmail}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="mt-2">Phone Number</label>
+                  <input
+                    type="tel"
+                    className="form-control "
+                    id="validationDefault01"
+                    placeholder="Ex: 539-982-55-77"
+                    ref={phoneNumber}
+                    pattern="[0-9]{3}-[0-9]{3}-[0-9]{2}-[0-9]{2}"
+                    onChange={handlePhoneNumber}
+                    required
+                  />
+                </div>
                 <div className="form-group mb-2 mt-2">
                   <label htmlFor="inputPassword5" className="form-label">
                     Password
@@ -236,7 +256,7 @@ function RegisterPage() {
                     className="form-control"
                     aria-describedby="passwordHelpBlock"
                     placeholder="Please Enter Your Password"
-                    onBlur={handleBlurPassword}
+                    onChange={handleBlurPassword}
                     ref={password}
                     required
                   />
