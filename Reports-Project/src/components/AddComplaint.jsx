@@ -23,14 +23,12 @@ function AddComplaint(props) {
   const [img, setImg] = useState("");
   const onAddComplaint = (event) => {
     event.preventDefault();
-    const randomUUID = uuidv4();
     props.onFormSubmit({
       title: Title.current.value,
       Description: Description.current.value,
       Type: Type.current.innerText,
       Date: formattedDate,
       status: "Pending",
-      id: randomUUID,
       Adress: Adress.current.value,
       image: img,
     });
